@@ -1,0 +1,49 @@
+{{define "content"}}{{with .Data}}
+<p class="crumbs"><a href="/">Kenya</a></p>
+<h1>{{.County.Name}}</h1>
+<p class="lede">County {{.County.Code}} · {{.County.ISOCode}} · formerly {{.County.FormerProvince}} Province · headquarters {{.County.Headquarters}}</p>
+
+<div class="split">
+  {{with .Map}}{{template "map" .}}{{else}}<p class="note">No boundary is known for this county.</p>{{end}}
+  <div>
+    <dl class="facts">
+      <dt>Population, 2019</dt><dd>{{num .County.Population}}</dd>
+      <dt>Men, women, intersex</dt><dd>{{num .County.PopulationMale}}, {{num .County.PopulationFemale}}, {{num .County.PopulationIntersex}}</dd>
+      <dt>Area</dt><dd>{{decimal .County.AreaKm2}} km²</dd>
+      <dt>Density</dt><dd>{{num (round .County.Density)}} people per km²</dd>
+      <dt>Registered voters, 2022</dt><dd>{{template "voters" .Voters}}</dd>
+      <dt>Constituencies</dt><dd>{{len .Constituencies}}</dd>
+      <dt>Wards</dt><dd>{{.Wards}}</dd>
+      <dt>Post offices</dt><dd>{{len .PostOffices}}</dd>
+      <dt>Centre</dt><dd><a href="{{atURL .County.Centroid.Lat .County.Centroid.Lng}}">{{coord .County.Centroid.Lat}}, {{coord .County.Centroid.Lng}}</a></dd>
+    </dl>
+    {{with .Neighbours}}
+    <h2 class="small">Borders</h2>
+    <p>{{range $i, $c := .}}{{if $i}}, {{end}}<a href="{{countyURL $c.Code}}">{{$c.Name}}</a>{{end}}</p>
+    {{end}}
+  </div>
+</div>
+
+<h2>Constituencies and wards</h2>
+{{range .Constituencies}}
+<section class="group">
+  <h3><a href="{{constituencyURL .Name}}">{{.Name}}</a> <span class="aside">{{len .Wards}} wards · {{template "voters" .Voters}} voters</span></h3>
+  <ul class="wards">
+  {{- range .Wards}}
+    <li><a href="{{wardURL .Code}}">{{title .Name}}</a></li>
+  {{- end}}
+  </ul>
+</section>
+{{end}}
+
+{{if not .Voters.Complete}}<p class="note" id="incomplete">* Della ward has no registered voter figure, so this total is slightly low.</p>{{end}}
+
+{{with .PostOffices}}
+<h2>Post offices</h2>
+<ul class="offices">
+{{- range .}}
+  <li><a href="{{postcodeURL .Code}}">{{.Code}}</a> {{.Name}}</li>
+{{- end}}
+</ul>
+{{end}}
+{{end}}{{end}}

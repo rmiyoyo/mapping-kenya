@@ -1,0 +1,40 @@
+{{define "content"}}{{with .Data}}
+<h1>Find a place</h1>
+<p class="lede">Which ward, constituency and county is a point in? Click the map, type coordinates, or use your own location.</p>
+
+<div class="split">
+  {{with .Pick}}{{template "map" .}}{{end}}
+  <div>
+    <form class="coords" action="/at">
+      <label>Latitude <input name="lat" value="{{.Lat}}" inputmode="decimal" placeholder="-1.2884" required></label>
+      <label>Longitude <input name="lng" value="{{.Lng}}" inputmode="decimal" placeholder="36.8233" required></label>
+      <button>Look up</button>
+      <button type="button" id="locate" hidden>Use my location</button>
+    </form>
+    <p class="note" id="locate-error"></p>
+
+    {{with .Problem}}<p class="problem">{{.}}</p>{{end}}
+
+    {{if .County}}
+    <dl class="facts">
+      {{with .Ward}}
+      <dt>Ward</dt><dd><a href="{{wardURL .Code}}">{{title .Name}}</a></dd>
+      <dt>Constituency</dt><dd><a href="{{constituencyURL .Constituency}}">{{.Constituency}}</a></dd>
+      {{end}}
+      <dt>County</dt><dd><a href="{{countyURL .County.Code}}">{{.County.Name}}</a></dd>
+    </dl>
+    {{if not .Ward}}<p class="note">No ward boundary covers this point, so only the county is known.</p>{{end}}
+    {{if and .Ward (ne .Ward.CountyCode .County.Code)}}<p class="note">This point is close to a county line: the IEBC files the ward under {{.Ward.CountyName}}, but the county outline puts the point in {{.County.Name}}.</p>{{end}}
+    {{with .PostOffices}}
+    <h2 class="small">Nearest post offices</h2>
+    {{template "nearby" .}}
+    {{end}}
+    {{end}}
+  </div>
+</div>
+
+{{with .Map}}
+<h2>Close up</h2>
+<div class="closeup">{{template "map" .}}</div>
+{{end}}
+{{end}}{{end}}

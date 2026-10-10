@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - name: go vet
+        run: go vet ./...
+      - name: staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+      - name: go test
+        run: go test -race ./...
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: docker build -t mapping-kenya .
+      - name: smoke test
+        run: |
+          docker run -d --name web -p 8080:8080 mapping-kenya
+          for i in $(seq 1 10); do curl -sf localhost:8080/ > /dev/null && break; sleep 1; done
+          curl -sf localhost:8080/counties/47 | grep -q "Nairobi County"
+          curl -sf localhost:8080/api/counties/47 | grep -q '"code":47'
+          docker stop web

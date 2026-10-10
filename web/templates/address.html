@@ -1,0 +1,30 @@
+{{define "content"}}{{with .Data}}
+<h1>Check an address</h1>
+<p class="lede">Paste a Kenyan postal address to see whether its box, postal code and town agree.</p>
+
+<form class="address" action="/addresses">
+  <label for="address" class="hidden">Address</label>
+  <input id="address" name="q" value="{{.Input}}" placeholder="P.O. Box 30197-00100 Nairobi" required>
+  <button>Check</button>
+</form>
+
+{{if .Input}}
+  {{with .Problem}}<p class="problem">{{.}}</p>{{end}}
+  {{if or (not .Problem) .Mismatch}}
+  <dl class="facts">
+    <dt>{{if .Address.PrivateBag}}Private bag{{else}}Box{{end}}</dt><dd>{{if .Address.Box}}{{.Address.Box}}{{else}}none{{end}}</dd>
+    <dt>Postal code</dt><dd>{{.Address.PostalCode}}</dd>
+    <dt>Town as written</dt><dd>{{if .Address.Town}}{{.Address.Town}}{{else}}none{{end}}</dd>
+    {{with .Address.PostOffice}}<dt>{{if $.Data.Mismatch}}That code belongs to{{else}}Post office{{end}}</dt><dd><a href="{{postcodeURL .Code}}">{{.Code}} {{.Name}}</a></dd>{{end}}
+    {{if not .Mismatch}}<dt>Written out</dt><dd><code>{{.Address.String}}</code></dd>{{end}}
+  </dl>
+  {{end}}
+{{end}}
+
+<h2 class="small">Try one</h2>
+<ul class="plain">
+{{- range .Examples}}
+  <li><a href="/addresses?q={{.}}">{{.}}</a></li>
+{{- end}}
+</ul>
+{{end}}{{end}}

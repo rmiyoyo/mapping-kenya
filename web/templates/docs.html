@@ -1,0 +1,23 @@
+{{define "content"}}{{with .Data}}
+{{if .Page}}
+<div class="docs">
+  <nav class="toc" aria-label="Contents">
+    <h2 class="small">Contents</h2>
+    <ul>
+    {{- range .Page.TOC}}
+      <li class="level{{.Level}}"><a href="#{{.ID}}">{{.Title}}</a></li>
+    {{- end}}
+    </ul>
+  </nav>
+  <article class="prose">
+    <h1>{{.Page.Title}}</h1>
+    <p class="lede">On this site the API lives at <code>{{.Base}}</code>, and the examples below point there. This page is rendered from <a href="{{.Source}}">docs/API.md</a> in the kenya-geo repository.</p>
+    {{.Body}}
+  </article>
+</div>
+{{else}}
+<h1>API</h1>
+<p class="problem">{{.Problem}}</p>
+<p><a href="https://github.com/rmiyoyo/kenya-geo/blob/main/docs/API.md">docs/API.md on GitHub</a></p>
+{{end}}
+{{end}}{{end}}

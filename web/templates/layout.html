@@ -1,0 +1,66 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .Title}}{{.Title}} · {{end}}Kenya Geo</title>
+<link rel="stylesheet" href="/static/site.css">
+<script src="/static/site.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">Kenya Geo</a>
+  <nav>
+    <a href="/at">Find a place</a>
+    <a href="/addresses">Check an address</a>
+    <a href="/docs">API</a>
+  </nav>
+  <form class="search" action="/search" role="search">
+    <label for="q" class="hidden">Search</label>
+    <input id="q" name="q" type="search" value="{{.Query}}" placeholder="County, constituency, ward or post office" autocomplete="off">
+    <button>Search</button>
+  </form>
+</header>
+<main>
+{{template "content" .}}
+</main>
+<footer>
+  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, post offices from GeoNames and OpenStreetMap.</p>
+  <p>Boundaries are simplified, so treat anything near a line as approximate.</p>
+</footer>
+</body>
+</html>
+{{end}}
+
+{{define "map"}}
+<figure class="map{{if .Pick}} pick{{end}}">
+  <svg viewBox="0 0 {{.W}} {{.H}}" role="img" aria-label="{{.Label}}" data-lng0="{{.Lng0}}" data-lat0="{{.Lat0}}" data-scale="{{.Scale}}">
+    {{- range .Shapes}}
+    {{- if and .Href (not $.Pick)}}
+    <a href="{{.Href}}"><path d="{{.D}}"{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path></a>
+    {{- else}}
+    <path d="{{.D}}"{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>
+    {{- end}}
+    {{- end}}
+    {{- with .Outline}}
+    <path class="outline" d="{{.}}"/>
+    {{- end}}
+    {{- with .Marker}}
+    <circle class="marker" cx="{{.X}}" cy="{{.Y}}" r="5"/>
+    {{- end}}
+  </svg>
+</figure>
+{{end}}
+
+{{define "voters"}}{{num .RegisteredVoters2022}}{{if not .Complete}}<sup><a href="#incomplete" title="One or more wards have no figure">*</a></sup>{{end}}{{end}}
+
+{{define "nearby"}}
+<table>
+  <thead><tr><th>Code</th><th>Post office</th><th class="n">Distance</th></tr></thead>
+  <tbody>
+  {{- range .}}
+  <tr><td><a href="{{postcodeURL .Code}}">{{.Code}}</a></td><td>{{.Name}}</td><td class="n">{{km .DistanceKm}}</td></tr>
+  {{- end}}
+  </tbody>
+</table>
+{{end}}
