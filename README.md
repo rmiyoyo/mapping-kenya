@@ -1,4 +1,4 @@
-# mapping-kenya
+# Mapping Kenya
 
 A website for Kenya's counties, constituencies, wards and post offices, built on the [kenya-geo](https://github.com/rmiyoyo/kenya-geo) Go package.
 
