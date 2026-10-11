@@ -53,7 +53,10 @@ func TestPages(t *testing.T) {
 		{"/static/site.js", 200, []string{"geolocation"}},
 		{"/nope", 404, []string{"There is no page at /nope"}},
 		{"/?sort=code", 200, []string{`data-metrics="population density voters area"`, `data-key="47"`, `data-population="4397073"`, `data-voters="2415310"`, `<tr data-key="47">`, "d3@7.9.0", "/static/charts.js"}},
-		{"/counties/47", 200, []string{`data-metrics="voters"`, `data-group="Kibra"`, `data-chart="constituencies"`, `{"name":"Kibra","href":"/constituencies/Kibra"`}},
+		{"/counties/47", 200, []string{`data-metrics="voters"`, `<li data-group="Kibra">`, `href="/constituencies/Kibra"`, "48 post offices</summary>"}},
+		{"/", 200, []string{`class="water"`, ">Lake Turkana</text>", ">Lake Victoria</text>", ">Indian Ocean</text>", `class="water sea"`, `<ol class="ranking">`, "--share: 1", `<details class="all" id="counties">`}},
+		{"/?sort=area", 200, []string{`<details class="all" id="counties" open>`}},
+		{"/counties/43", 200, []string{`class="water"`, "Lake Victoria"}},
 		{"/wards/0040", 200, []string{"data-focus", `data-key="0040"`}},
 		{"/static/charts.js", 200, []string{"d3.zoom", "scaleQuantile"}},
 	}

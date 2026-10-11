@@ -107,9 +107,16 @@ type countyRow struct {
 	Voters kenyageo.VoterTotal
 }
 
+type rankRow struct {
+	countyRow
+	Share float64
+}
+
 type homeData struct {
 	Map            *mapView
 	Counties       []countyRow
+	Ranking        []rankRow
+	TableOpen      bool
 	Sort           string
 	Voters         kenyageo.VoterTotal
 	Constituencies int
@@ -130,6 +137,7 @@ var sorts = map[string]func(a, b countyRow) int{
 func (s *site) home(w http.ResponseWriter, r *http.Request) {
 	d := homeData{Map: s.maps.country.with("population density voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
 	by, ok := sorts[d.Sort]
+	d.TableOpen = ok
 	if !ok {
 		d.Sort, by = "code", sorts["code"]
 	}
@@ -140,6 +148,11 @@ func (s *site) home(w http.ResponseWriter, r *http.Request) {
 		d.Wards += len(s.geo.WardsInCounty(c.Code))
 	}
 	slices.SortStableFunc(d.Counties, by)
+	ranked := slices.Clone(d.Counties)
+	slices.SortStableFunc(ranked, sorts["population"])
+	for _, c := range ranked {
+		d.Ranking = append(d.Ranking, rankRow{c, float64(c.Population) / float64(max(ranked[0].Population, 1))})
+	}
 	s.render(w, r, http.StatusOK, "home", page{Data: d})
 }
 
@@ -147,19 +160,12 @@ type constituencyGroup struct {
 	Name   string
 	Voters kenyageo.VoterTotal
 	Wards  []kenyageo.Ward
-}
-
-type constituencyBar struct {
-	Name   string `json:"name"`
-	Href   string `json:"href"`
-	Voters int    `json:"voters"`
-	Wards  int    `json:"wards"`
+	Share  float64
 }
 
 type countyData struct {
 	County         kenyageo.County
 	Map            *mapView
-	Chart          []constituencyBar
 	Voters         kenyageo.VoterTotal
 	Neighbours     []kenyageo.County
 	Constituencies []constituencyGroup
@@ -193,8 +199,17 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 		g.Voters, _ = s.geo.ConstituencyVoters(name)
 		d.Wards += len(g.Wards)
 		d.Constituencies = append(d.Constituencies, g)
-		d.Chart = append(d.Chart, constituencyBar{Name: name, Href: constituencyURL(name), Voters: g.Voters.RegisteredVoters2022, Wards: len(g.Wards)})
 	}
+	top := 1
+	for _, g := range d.Constituencies {
+		top = max(top, g.Voters.RegisteredVoters2022)
+	}
+	for i := range d.Constituencies {
+		d.Constituencies[i].Share = float64(d.Constituencies[i].Voters.RegisteredVoters2022) / float64(top)
+	}
+	slices.SortStableFunc(d.Constituencies, func(a, b constituencyGroup) int {
+		return cmp.Compare(b.Voters.RegisteredVoters2022, a.Voters.RegisteredVoters2022)
+	})
 	s.render(w, r, http.StatusOK, "county", page{Title: c.Name, Data: d})
 }
 

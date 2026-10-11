@@ -1,43 +1,72 @@
 {{define "content"}}{{with .Data}}
-<div class="intro">
-  <div>
-    <h1>Kenya's counties, constituencies, wards and post offices</h1>
-    <p>{{len .Counties}} counties, {{num .Constituencies}} constituencies and {{num .Wards}} wards, with {{num .Voters.RegisteredVoters2022}} voters on the 2022 register. Pick a county on the map or in the table, search for any place by name, or <a href="/at">find out which ward a point is in</a>.</p>
-    <p>Everything here comes from one Go package, and the same data is available as JSON under <code>/api</code>. <a href="/api/">Read the API documentation</a>.</p>
+<div class="atlas">
+  <div class="atlas-map">
+    {{with .Map}}{{template "map" .}}{{end}}
   </div>
-  {{with .Map}}{{template "map" .}}{{end}}
+  <div class="atlas-side">
+    <h1>Kenya, county by county</h1>
+    <p class="lede">Census figures, registered voters, wards and post offices for every county. Pick a county on the map, search above, or <a href="/at">find which ward a point is in</a>.</p>
+
+    <dl class="stats">
+      <div><dt>Counties</dt><dd>{{len .Counties}}</dd></div>
+      <div><dt>Constituencies</dt><dd>{{num .Constituencies}}</dd></div>
+      <div><dt>Wards</dt><dd>{{num .Wards}}</dd></div>
+      <div><dt>Voters, 2022</dt><dd>{{num .Voters.RegisteredVoters2022}}</dd></div>
+    </dl>
+
+    <section class="ranked" aria-labelledby="ranked-title">
+      <div class="ranked-head">
+        <h2 id="ranked-title" class="small">Top 10 by <span data-metric-label>population</span></h2>
+        <div data-map-controls></div>
+      </div>
+      <ol class="ranking">
+      {{- range $i, $c := .Ranking}}
+        <li data-key="{{$c.Code}}" data-population="{{$c.Population}}" data-density="{{$c.Density}}" data-voters="{{$c.Voters.RegisteredVoters2022}}" data-area="{{$c.AreaKm2}}"{{if ge $i 10}} hidden{{end}}>
+          <a href="{{countyURL $c.Code}}">{{$c.Name}}</a>
+          <span class="bar" style="--share: {{$c.Share}}"></span>
+          <span class="n value">{{num $c.Population}}</span>
+        </li>
+      {{- end}}
+      </ol>
+      <p class="more"><a href="#counties">All 47 counties</a></p>
+    </section>
+
+    <p class="aside">The same data is available as JSON. <a href="/api/">Read the API documentation</a>.</p>
+  </div>
 </div>
 
-<h2 id="counties">Counties</h2>
-<div class="scroll">
-<table class="counties">
-  <thead>
-    <tr>
-      {{template "sorthead" (list "code" "No." .Sort false)}}
-      {{template "sorthead" (list "name" "County" .Sort false)}}
-      <th>Headquarters</th>
-      {{template "sorthead" (list "population" "Population" .Sort true)}}
-      {{template "sorthead" (list "area" "Area, km²" .Sort true)}}
-      {{template "sorthead" (list "density" "People per km²" .Sort true)}}
-      {{template "sorthead" (list "voters" "Voters, 2022" .Sort true)}}
-    </tr>
-  </thead>
-  <tbody>
-  {{- range .Counties}}
-    <tr data-key="{{.Code}}">
-      <td>{{.Code}}</td>
-      <td><a href="{{countyURL .Code}}">{{.Name}}</a></td>
-      <td>{{.Headquarters}}</td>
-      <td class="n">{{num .Population}}</td>
-      <td class="n">{{decimal .AreaKm2}}</td>
-      <td class="n">{{num (round .Density)}}</td>
-      <td class="n">{{template "voters" .Voters}}</td>
-    </tr>
-  {{- end}}
-  </tbody>
-</table>
-</div>
-<p class="note" id="incomplete">* Della ward in Eldas, Wajir has no registered voter figure, so totals that include it are slightly low.</p>
+<details class="all" id="counties"{{if .TableOpen}} open{{end}}>
+  <summary>All 47 counties in a table</summary>
+  <div class="scroll">
+  <table class="counties">
+    <thead>
+      <tr>
+        {{template "sorthead" (list "code" "No." .Sort false)}}
+        {{template "sorthead" (list "name" "County" .Sort false)}}
+        <th>Headquarters</th>
+        {{template "sorthead" (list "population" "Population" .Sort true)}}
+        {{template "sorthead" (list "area" "Area, km²" .Sort true)}}
+        {{template "sorthead" (list "density" "People per km²" .Sort true)}}
+        {{template "sorthead" (list "voters" "Voters, 2022" .Sort true)}}
+      </tr>
+    </thead>
+    <tbody>
+    {{- range .Counties}}
+      <tr data-key="{{.Code}}">
+        <td class="n">{{.Code}}</td>
+        <td><a href="{{countyURL .Code}}">{{.Name}}</a></td>
+        <td>{{.Headquarters}}</td>
+        <td class="n">{{num .Population}}</td>
+        <td class="n">{{decimal .AreaKm2}}</td>
+        <td class="n">{{num (round .Density)}}</td>
+        <td class="n">{{template "voters" .Voters}}</td>
+      </tr>
+    {{- end}}
+    </tbody>
+  </table>
+  </div>
+  <p class="note" id="incomplete">* Della ward in Eldas, Wajir has no registered voter figure, so totals that include it are slightly low.</p>
+</details>
 {{end}}{{end}}
 
 {{define "sorthead"}}{{$key := index . 0}}{{$label := index . 1}}{{$sort := index . 2}}{{$num := index . 3}}<th{{if $num}} class="n"{{end}}{{if eq $key $sort}} aria-sort="{{if $num}}descending{{else}}ascending{{end}}"{{end}}>{{if eq $key $sort}}{{$label}}{{else}}<a href="/?sort={{$key}}#counties">{{$label}}</a>{{end}}</th>{{end}}
