@@ -2,13 +2,21 @@
   if (!window.d3) return;
 
   var whole = d3.format(",");
+  var tenth = d3.format(",.1f");
+  var percent = function (v) { return tenth(v) + "%"; };
   var metrics = {
-    population: { label: "Population, 2019", heading: "population", format: whole },
-    density: { label: "People per km²", heading: "density", format: function (v) { return whole(Math.round(v)); } },
-    voters: { label: "Registered voters, 2022", heading: "registered voters", format: whole },
-    area: { label: "Area, km²", heading: "area", format: d3.format(",.1f") }
+    population: { group: "People", short: "Population", label: "Population, 2019", heading: "population", format: whole, tick: d3.format(".2~s") },
+    density: { group: "People", short: "Density", label: "People per km²", heading: "density", format: function (v) { return whole(Math.round(v)); }, tick: d3.format(",.0f") },
+    "household-size": { group: "People", short: "Household size", label: "People per household", heading: "household size", format: tenth, tick: d3.format(".1f") },
+    electricity: { group: "Living conditions, 2019", short: "Electricity", label: "Homes lit by mains electricity", heading: "electricity", format: percent, tick: d3.format(".0f") },
+    water: { group: "Living conditions, 2019", short: "Piped water", label: "Homes with piped water", heading: "piped water", format: percent, tick: d3.format(".0f") },
+    internet: { group: "Living conditions, 2019", short: "Internet use", label: "People using the internet", heading: "internet use", format: percent, tick: d3.format(".0f") },
+    mobile: { group: "Living conditions, 2019", short: "Mobile phones", label: "People owning a mobile phone", heading: "mobile phones", format: percent, tick: d3.format(".0f") },
+    school: { group: "Living conditions, 2019", short: "School attendance", label: "Children aged 6 to 17 in school", heading: "school attendance", format: percent, tick: d3.format(".0f") },
+    voters: { group: "Elections", short: "Voters", label: "Registered voters, 2022", heading: "registered voters", format: whole, tick: d3.format(".2~s") },
+    area: { group: "Land", short: "Area", label: "Area, km²", heading: "area", format: tenth, tick: d3.format(".2~s") }
   };
-  var short = { population: "Population", density: "Density", voters: "Voters", area: "Area" };
+  var active = null;
   var steps = 6;
 
   function shade(i) {
@@ -29,7 +37,8 @@
     var group = el.getAttribute("data-group");
     if (group) tip.append("span").attr("class", "tip-group").text(group + " constituency");
     var rows = tip.append("dl");
-    Object.keys(metrics).forEach(function (m) {
+    var shown = active ? [active].concat(["population", "voters"].filter(function (m) { return m !== active; })) : ["population", "voters"];
+    shown.forEach(function (m) {
       var v = value(el, m);
       if (isNaN(v)) return;
       rows.append("dt").text(metrics[m].label);
@@ -136,16 +145,22 @@
     var controls = slot ? d3.select(slot) : d3.select(map.figure).insert("div", ":first-child");
     var legend = d3.select(map.figure).append("div").attr("class", "legend");
 
+    var select = null;
     if (keys.length > 1) {
-      controls.append("div").attr("class", "switch").attr("role", "group").attr("aria-label", "Shade the map by")
-        .selectAll("button").data(keys).join("button")
-        .attr("type", "button")
-        .text(function (m) { return short[m]; })
-        .on("click", function (event, m) { apply(m); });
+      var label = controls.append("label").attr("class", "metric-select");
+      label.append("span").text("Shade by");
+      select = label.append("select").on("change", function () { apply(this.value); });
+      d3.groups(keys, function (m) { return metrics[m].group; }).forEach(function (g) {
+        select.append("optgroup").attr("label", g[0])
+          .selectAll("option").data(g[1]).join("option")
+          .attr("value", function (m) { return m; })
+          .text(function (m) { return metrics[m].short; });
+      });
     }
 
     function apply(metric) {
-      controls.selectAll("button").attr("aria-pressed", function (m) { return m === metric; });
+      active = metric;
+      if (select) select.property("value", metric);
       var values = map.shapes.nodes().map(function (n) { return value(n, metric); }).filter(function (v) { return !isNaN(v); });
       var scale = d3.scaleQuantile().domain(values).range(d3.range(steps));
       map.shapes.style("fill", function () {
@@ -171,7 +186,7 @@
         .attr("height", h)
         .attr("rx", 1)
         .style("fill", shade);
-      var tick = d3.format(metric === "density" ? ",.0f" : ".2~s");
+      var tick = metrics[metric].tick;
       g.selectAll("text").data(stops).join("text")
         .attr("x", function (v, i) { return x(i); })
         .attr("y", h + 13)

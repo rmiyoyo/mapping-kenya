@@ -34,8 +34,31 @@
       <dt>Centre</dt><dd><a href="{{atURL .County.Centroid.Lat .County.Centroid.Lng}}">{{coord .County.Centroid.Lat}}, {{coord .County.Centroid.Lng}}</a></dd>
       {{with .Neighbours}}<dt>Borders</dt><dd>{{range $i, $c := .}}{{if $i}}, {{end}}<a href="{{countyURL $c.Code}}">{{$c.Name}}</a>{{end}}</dd>{{end}}
     </dl>
+    {{with .Living}}
+    <section class="living" aria-labelledby="living-title">
+      <h2 id="living-title" class="small">Living conditions, 2019 census</h2>
+      <dl class="living-grid">
+      {{- range .}}
+        <div>
+          <dt>{{.Label}}</dt>
+          <dd>
+            <strong>{{.Value}}</strong>
+            {{- if .Share}}
+            <span class="meter" style="--v: {{.Share}}; --k: {{.KShare}}" aria-hidden="true"></span>
+            {{- end}}
+            {{- with .Kenya}}
+            <span class="kenya">Kenya {{.}}</span>
+            {{- end}}
+          </dd>
+        </div>
+      {{- end}}
+      </dl>
+      <p class="note">The tick on each bar marks the figure for Kenya as a whole.</p>
+    </section>
+    {{end}}
   </div>
 </div>
+
 
 {{if not .Voters.Complete}}<p class="note" id="incomplete">* Della ward has no registered voter figure, so this total is slightly low.</p>{{end}}
 

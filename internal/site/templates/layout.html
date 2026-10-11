@@ -71,7 +71,9 @@
 </figure>
 {{end}}
 
-{{define "shape"}}<path d="{{.D}}" data-key="{{.Key}}" data-name="{{.Name}}"{{with .Group}} data-group="{{.}}"{{end}}{{with .Stats}}{{if .Population}} data-population="{{.Population}}" data-area="{{.AreaKm2}}" data-density="{{.Density}}"{{end}}{{with .Voters}} data-voters="{{.}}"{{end}}{{end}}{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>{{end}}
+{{define "shape"}}<path d="{{.D}}" data-key="{{.Key}}" data-name="{{.Name}}"{{with .Group}} data-group="{{.}}"{{end}}{{with .Stats}}{{if .Population}} data-population="{{.Population}}" data-area="{{.AreaKm2}}" data-density="{{.Density}}"{{end}}{{with .Voters}} data-voters="{{.}}"{{end}}{{with .Living}}{{template "living-data" .}}{{end}}{{end}}{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>{{end}}
+
+{{define "living-data"}} data-households="{{.Households}}" data-household-size="{{.HouseholdSize}}" data-electricity="{{.ElectricityPct}}" data-water="{{.PipedWaterPct}}" data-internet="{{.InternetPct}}" data-mobile="{{.MobilePhonePct}}" data-school="{{.SchoolAttendancePct}}"{{end}}
 
 {{define "voters"}}{{num .RegisteredVoters2022}}{{if not .Complete}}<sup><a href="#incomplete" title="One or more wards have no figure">*</a></sup>{{end}}{{end}}
 

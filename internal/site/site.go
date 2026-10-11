@@ -135,7 +135,7 @@ var sorts = map[string]func(a, b countyRow) int{
 }
 
 func (s *site) home(w http.ResponseWriter, r *http.Request) {
-	d := homeData{Map: s.maps.country.with("population density voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
+	d := homeData{Map: s.maps.country.with("population density household-size electricity water internet mobile school voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
 	by, ok := sorts[d.Sort]
 	d.TableOpen = ok
 	if !ok {
@@ -171,6 +171,44 @@ type countyData struct {
 	Constituencies []constituencyGroup
 	Wards          int
 	PostOffices    []kenyageo.PostOffice
+	Living         []livingRow
+}
+
+type livingRow struct {
+	Label   string
+	Value   string
+	Kenya   string
+	Share   float64
+	KShare  float64
+	Above   bool
+	Percent bool
+}
+
+func livingRows(c, k kenyageo.Living, haveKenya bool) []livingRow {
+	pct := func(label string, v, n float64) livingRow {
+		r := livingRow{Label: label, Value: decimal(v) + "%", Share: v / 100, Percent: true, Above: v >= n}
+		if haveKenya {
+			r.KShare = n / 100
+		}
+		if haveKenya {
+			r.Kenya = decimal(n) + "%"
+		}
+		return r
+	}
+	size := livingRow{Label: "People per household", Value: decimal(c.HouseholdSize), Share: c.HouseholdSize / 8, Above: c.HouseholdSize >= k.HouseholdSize}
+	if haveKenya {
+		size.Kenya = decimal(k.HouseholdSize)
+		size.KShare = k.HouseholdSize / 8
+	}
+	return []livingRow{
+		{Label: "Households", Value: num(c.Households)},
+		size,
+		pct("Homes lit by mains electricity", c.ElectricityPct, k.ElectricityPct),
+		pct("Homes with piped water", c.PipedWaterPct, k.PipedWaterPct),
+		pct("People using the internet", c.InternetPct, k.InternetPct),
+		pct("People owning a mobile phone", c.MobilePhonePct, k.MobilePhonePct),
+		pct("Children aged 6 to 17 in school", c.SchoolAttendancePct, k.SchoolAttendancePct),
+	}
 }
 
 func (s *site) county(w http.ResponseWriter, r *http.Request) {
@@ -194,6 +232,8 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 		PostOffices: s.geo.PostOfficesInCounty(c.Code),
 	}
 	d.Voters, _ = s.geo.CountyVoters(c.Code)
+	national, ok := s.geo.NationalLiving()
+	d.Living = livingRows(c.Living, national, ok)
 	for _, name := range s.geo.Constituencies(c.Code) {
 		g := constituencyGroup{Name: name, Wards: s.geo.WardsInConstituency(name)}
 		g.Voters, _ = s.geo.ConstituencyVoters(name)
