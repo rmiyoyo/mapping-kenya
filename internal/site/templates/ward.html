@@ -1,0 +1,24 @@
+{{define "content"}}{{with .Data}}
+<p class="crumbs"><a href="/">Kenya</a> / <a href="{{countyURL .County.Code}}">{{.County.Name}}</a> / <a href="{{constituencyURL .Ward.Constituency}}">{{.Ward.Constituency}}</a></p>
+<h1>{{title .Ward.Name}} ward</h1>
+<p class="lede">Ward {{.Ward.Code}} in {{.Ward.Constituency}} constituency, {{.County.Name}}</p>
+
+<div class="split">
+  {{with .Map}}{{template "map" .}}{{end}}
+  <div>
+    <dl class="facts">
+      <dt>Registered voters, 2022</dt><dd>{{with .Ward.RegisteredVoters2022}}{{num .}}{{else}}not known{{end}}</dd>
+      <dt>Centre</dt><dd>{{with .Ward.Centroid}}<a href="{{atURL .Lat .Lng}}">{{coord .Lat}}, {{coord .Lng}}</a>{{else}}not known{{end}}</dd>
+    </dl>
+    {{if not .Ward.Centroid}}<p class="note">This ward's name couldn't be matched to the boundary data, so it isn't drawn on the map.</p>{{end}}
+    {{with .PostOffices}}
+    <h2 class="small">Nearest post offices</h2>
+    {{template "nearby" .}}
+    {{end}}
+    {{with .Siblings}}
+    <h2 class="small">Other wards in {{$.Data.Ward.Constituency}}</h2>
+    <p>{{range $i, $w := .}}{{if $i}}, {{end}}<a href="{{wardURL $w.Code}}">{{title $w.Name}}</a>{{end}}</p>
+    {{end}}
+  </div>
+</div>
+{{end}}{{end}}

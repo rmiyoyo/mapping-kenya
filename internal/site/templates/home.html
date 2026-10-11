@@ -1,0 +1,43 @@
+{{define "content"}}{{with .Data}}
+<div class="intro">
+  <div>
+    <h1>Kenya's counties, constituencies, wards and post offices</h1>
+    <p>{{len .Counties}} counties, {{num .Constituencies}} constituencies and {{num .Wards}} wards, with {{num .Voters.RegisteredVoters2022}} voters on the 2022 register. Pick a county on the map or in the table, search for any place by name, or <a href="/at">find out which ward a point is in</a>.</p>
+    <p>Everything here comes from one Go package, and the same data is available as JSON under <code>/api</code>. <a href="/api/">Read the API documentation</a>.</p>
+  </div>
+  {{with .Map}}{{template "map" .}}{{end}}
+</div>
+
+<h2 id="counties">Counties</h2>
+<div class="scroll">
+<table class="counties">
+  <thead>
+    <tr>
+      {{template "sorthead" (list "code" "No." .Sort false)}}
+      {{template "sorthead" (list "name" "County" .Sort false)}}
+      <th>Headquarters</th>
+      {{template "sorthead" (list "population" "Population" .Sort true)}}
+      {{template "sorthead" (list "area" "Area, km²" .Sort true)}}
+      {{template "sorthead" (list "density" "People per km²" .Sort true)}}
+      {{template "sorthead" (list "voters" "Voters, 2022" .Sort true)}}
+    </tr>
+  </thead>
+  <tbody>
+  {{- range .Counties}}
+    <tr>
+      <td>{{.Code}}</td>
+      <td><a href="{{countyURL .Code}}">{{.Name}}</a></td>
+      <td>{{.Headquarters}}</td>
+      <td class="n">{{num .Population}}</td>
+      <td class="n">{{decimal .AreaKm2}}</td>
+      <td class="n">{{num (round .Density)}}</td>
+      <td class="n">{{template "voters" .Voters}}</td>
+    </tr>
+  {{- end}}
+  </tbody>
+</table>
+</div>
+<p class="note" id="incomplete">* Della ward in Eldas, Wajir has no registered voter figure, so totals that include it are slightly low.</p>
+{{end}}{{end}}
+
+{{define "sorthead"}}{{$key := index . 0}}{{$label := index . 1}}{{$sort := index . 2}}{{$num := index . 3}}<th{{if $num}} class="n"{{end}}{{if eq $key $sort}} aria-sort="{{if $num}}descending{{else}}ascending{{end}}"{{end}}>{{if eq $key $sort}}{{$label}}{{else}}<a href="/?sort={{$key}}#counties">{{$label}}</a>{{end}}</th>{{end}}
