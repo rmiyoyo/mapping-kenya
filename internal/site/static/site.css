@@ -362,6 +362,34 @@ input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visibl
   box-shadow: 0 1px 2px oklch(24% 0.025 255 / 0.12);
 }
 
+.metric-select {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.metric-select select {
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: oklch(99.5% 0.003 95);
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+.metric-select select:hover {
+  border-color: var(--muted);
+}
+
+.metric-select select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .map {
   position: relative;
   margin: 0;
@@ -627,6 +655,51 @@ th[aria-sort="ascending"]::after {
 
 tbody tr:hover, tr.hl {
   background: var(--accent-soft);
+}
+
+.living-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-md) var(--space-lg);
+  margin: 0;
+}
+
+.living-grid dt {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.living-grid dd {
+  margin: 0;
+}
+
+.living-grid strong {
+  display: block;
+  font: 600 1.25rem/1.25 var(--font-display);
+}
+
+.meter {
+  position: relative;
+  display: block;
+  height: 0.45rem;
+  margin: var(--space-2xs) 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--scale-hi) calc(var(--v, 0) * 100%), var(--paper-2) 0);
+}
+
+.meter::after {
+  content: "";
+  position: absolute;
+  top: -0.2rem;
+  bottom: -0.2rem;
+  left: calc(var(--k, 0) * 100%);
+  width: 2px;
+  background: var(--ink);
+}
+
+.kenya {
+  font-size: 0.78rem;
+  color: var(--muted);
 }
 
 details.all {

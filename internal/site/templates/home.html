@@ -21,7 +21,7 @@
       </div>
       <ol class="ranking">
       {{- range $i, $c := .Ranking}}
-        <li data-key="{{$c.Code}}" data-population="{{$c.Population}}" data-density="{{$c.Density}}" data-voters="{{$c.Voters.RegisteredVoters2022}}" data-area="{{$c.AreaKm2}}"{{if ge $i 10}} hidden{{end}}>
+        <li data-key="{{$c.Code}}" data-population="{{$c.Population}}" data-density="{{$c.Density}}" data-voters="{{$c.Voters.RegisteredVoters2022}}" data-area="{{$c.AreaKm2}}"{{template "living-data" $c.Living}}{{if ge $i 10}} hidden{{end}}>
           <a href="{{countyURL $c.Code}}">{{$c.Name}}</a>
           <span class="bar" style="--share: {{$c.Share}}"></span>
           <span class="n value">{{num $c.Population}}</span>
