@@ -1,0 +1,26 @@
+{{define "content"}}{{with .Data}}
+<div class="docs">
+  <nav class="toc" aria-label="On this page">
+    <h2 class="small">On this page</h2>
+    <ol>
+      {{- range .Sections}}
+      <li><a href="#{{.ID}}">{{.Title}}</a>
+        {{- with .Links}}
+        <ol>
+          {{- range .}}
+          <li><a href="#{{.ID}}">{{if .Method}}<code>{{.Path}}</code>{{else}}{{.Title}}{{end}}</a></li>
+          {{- end}}
+        </ol>
+        {{- end}}
+      </li>
+      {{- end}}
+    </ol>
+  </nav>
+  <article class="doc">
+    <h1>{{.Title}}</h1>
+    <p class="base">On this site the API is at <code>{{.Base}}</code>, so <code>GET /counties</code> is <a href="/api/counties"><code>{{.Base}}/counties</code></a>. Each example below has a <em>Try it</em> link that runs it here.</p>
+    {{.Body}}
+    <p class="aside source">This page is <a href="{{.Source}}"><code>api/README.md</code></a> from kenya-geo{{with .Version}} {{.}}{{end}}, the same package that serves the API.</p>
+  </article>
+</div>
+{{end}}{{end}}

@@ -1,0 +1,15 @@
+{{define "content"}}
+<h1>Search for “{{.Query}}”</h1>
+{{with .Data}}
+<table class="results">
+  <thead><tr><th>Name</th><th>Kind</th><th>County</th></tr></thead>
+  <tbody>
+  {{- range .}}
+    <tr><td><a href="{{.Href}}">{{.Name}}</a>{{if .Code}} <span class="aside">{{.Code}}</span>{{end}}</td><td>{{.Kind}}</td><td>{{.County}}</td></tr>
+  {{- end}}
+  </tbody>
+</table>
+{{else}}
+<p>Nothing matches. Check the spelling, or try part of the name.</p>
+{{end}}
+{{end}}

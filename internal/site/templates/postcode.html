@@ -1,0 +1,21 @@
+{{define "content"}}{{with .Data}}
+<p class="crumbs"><a href="/">Kenya</a> / post offices</p>
+{{range .Offices}}
+<h1>{{.Code}} {{.Name}}</h1>
+<p class="lede">Post office in <a href="{{countyURL .County.Code}}">{{.County.Name}}</a></p>
+{{end}}
+<div class="split">
+  {{with .Map}}{{template "map" .}}{{end}}
+  <div>
+  {{range .Offices}}
+    <dl class="facts">
+      <dt>Postal code</dt><dd>{{.Code}}</dd>
+      <dt>Location</dt><dd>{{with .Location}}<a href="{{atURL .Lat .Lng}}">{{coord .Lat}}, {{coord .Lng}}</a>{{else}}not known{{end}}</dd>
+      {{with .Ward}}<dt>Ward</dt><dd><a href="{{wardURL .Code}}">{{title .Name}}</a>, {{.Constituency}}</dd>{{end}}
+      {{with .LocationSource}}<dt>Located by</dt><dd>{{if eq . "geonames"}}GeoNames{{else}}OpenStreetMap{{end}}</dd>{{end}}
+    </dl>
+    <p>Write it as <code>P.O. Box 123-{{.Code}} {{.Name}}</code>, with your own box number.</p>
+  {{end}}
+  </div>
+</div>
+{{end}}{{end}}

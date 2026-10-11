@@ -1,0 +1,24 @@
+{{define "content"}}{{with .Data}}
+<p class="crumbs"><a href="/">Kenya</a> / <a href="{{countyURL .County.Code}}">{{.County.Name}}</a></p>
+<h1>{{.Name}} constituency</h1>
+<p class="lede">{{len .Wards}} wards · {{template "voters" .Voters}} registered voters in 2022</p>
+
+<div class="split">
+  {{with .Map}}{{template "map" .}}{{end}}
+  <div>
+    <table>
+      <thead><tr><th>Code</th><th>Ward</th><th class="n">Voters, 2022</th></tr></thead>
+      <tbody>
+      {{- range .Wards}}
+        <tr><td>{{.Code}}</td><td><a href="{{wardURL .Code}}">{{title .Name}}</a></td><td class="n">{{with .RegisteredVoters2022}}{{num .}}{{else}}not known{{end}}</td></tr>
+      {{- end}}
+      </tbody>
+    </table>
+    {{with .Others}}
+    <h2 class="small">Other constituencies in {{$.Data.County.Name}}</h2>
+    <p>{{range $i, $n := .}}{{if $i}}, {{end}}<a href="{{constituencyURL $n}}">{{$n}}</a>{{end}}</p>
+    {{end}}
+  </div>
+</div>
+{{if not .Voters.Complete}}<p class="note" id="incomplete">* Della ward has no registered voter figure, so this total is slightly low.</p>{{end}}
+{{end}}{{end}}
