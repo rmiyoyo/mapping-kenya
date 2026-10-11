@@ -1,39 +1,55 @@
 :root {
-  --paper: #f6f3ec;
-  --ink: #23211d;
-  --muted: #6e6a60;
-  --rule: #d9d3c5;
-  --accent: #9a3324;
-  --land: #e7e0cf;
-  --land-edge: #9b9383;
-  --on: #c4693f;
-  --code-bg: #efe9dc;
-  --tok-key: #7b2d1f;
-  --tok-str: #3c6a45;
-  --tok-num: #2d5c86;
-  --tok-lit: #8a5a12;
-  --scale-lo: #efe6d3;
-  --scale-hi: #8a2b1d;
+  --paper: #fbfbf9;
+  --ink: #1d211e;
+  --muted: #5f655f;
+  --rule: #e2e4df;
+  --accent: #1f5f9e;
+  --land: #e9ebe6;
+  --land-edge: #fbfbf9;
+  --edge: #a3a8a1;
+  --on: #e0782f;
+  --water: #b5d3ea;
+  --water-edge: #8db6d8;
+  --water-ink: #2f6694;
+  --field: #ffffff;
+  --code-bg: #f1f3ef;
+  --tok-key: #8a3b12;
+  --tok-str: #2f6b3c;
+  --tok-num: #1f5f9e;
+  --tok-lit: #7a5a10;
+  --seq-1: #8dbf7f;
+  --seq-2: #68a565;
+  --seq-3: #4a8a52;
+  --seq-4: #306d3e;
+  --seq-5: #1a512c;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #1c1b18;
-    --ink: #e9e5da;
-    --muted: #a19b8d;
-    --rule: #3a3731;
-    --accent: #e08a6c;
-    --land: #2f2c26;
-    --land-edge: #7d7667;
-    --on: #b25a35;
-    --code-bg: #262420;
-    --tok-key: #e8a48c;
-    --tok-str: #9ccaa3;
-    --tok-num: #94bce0;
-    --tok-lit: #e0b872;
-    --scale-lo: #34302a;
-    --scale-hi: #f2a684;
+    --paper: #161816;
+    --ink: #e4e7e2;
+    --muted: #9ba19a;
+    --rule: #2d312d;
+    --accent: #8cb8e8;
+    --land: #2a2e2a;
+    --land-edge: #161816;
+    --edge: #6c736b;
+    --on: #e8914f;
+    --water: #23415c;
+    --water-edge: #2f5678;
+    --water-ink: #9cc2e4;
+    --field: #1d201d;
+    --code-bg: #1f221f;
+    --tok-key: #eba27c;
+    --tok-str: #9fd0a6;
+    --tok-num: #8cb8e8;
+    --tok-lit: #dfbd70;
+    --seq-1: #2a5a37;
+    --seq-2: #3b7a47;
+    --seq-3: #559c5b;
+    --seq-4: #7fbf77;
+    --seq-5: #b5dea3;
     color-scheme: dark;
   }
 }
@@ -48,7 +64,7 @@ body {
   padding: 0 1rem 3rem;
   background: var(--paper);
   color: var(--ink);
-  font: 17px/1.5 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 a {
@@ -62,26 +78,28 @@ a:hover {
 }
 
 h1, h2, h3 {
-  font-weight: normal;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   margin: 1.25rem 0 0.25rem;
 }
 
 h2 {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   margin: 2.5rem 0 0.75rem;
   padding-bottom: 0.25rem;
   border-bottom: 1px solid var(--rule);
 }
 
 h2.small {
-  font-size: 1rem;
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
   margin: 1.5rem 0 0.5rem;
   border: 0;
   padding: 0;
@@ -110,14 +128,13 @@ code {
   align-items: baseline;
   gap: 0.5rem 1.5rem;
   padding: 1rem 0 0.75rem;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
 .brand {
   color: var(--ink);
-  font-size: 1.25rem;
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
+  font-size: 1.1rem;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -139,10 +156,10 @@ input, button {
   font: inherit;
   font-size: 0.95rem;
   color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--land-edge);
-  border-radius: 2px;
-  padding: 0.3rem 0.5rem;
+  background: var(--field);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
 }
 
 input {
@@ -153,6 +170,7 @@ input {
 button {
   cursor: pointer;
   background: var(--land);
+  border-color: var(--land);
 }
 
 button:hover {
@@ -200,6 +218,14 @@ input:focus, button:focus-visible, a:focus-visible {
   align-items: start;
 }
 
+.intro {
+  margin-top: 1.25rem;
+}
+
+.intro h1 {
+  margin-top: 0;
+}
+
 @media (min-width: 52rem) {
   .intro {
     grid-template-columns: 1fr 1.1fr;
@@ -228,14 +254,13 @@ input:focus, button:focus-visible, a:focus-visible {
 .map path {
   fill: var(--land);
   stroke: var(--land-edge);
-  stroke-width: 0.6;
+  stroke-width: 0.8;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
 
 .map a path:hover, .pick path:hover {
-  fill: var(--on);
-  fill-opacity: 0.55;
+  fill: color-mix(in srgb, var(--on) 45%, var(--land));
 }
 
 .map path.on {
@@ -244,13 +269,36 @@ input:focus, button:focus-visible, a:focus-visible {
 
 .map path.outline {
   fill: none;
-  stroke: var(--muted);
+  stroke: var(--edge);
   stroke-width: 1;
   pointer-events: none;
 }
 
+.map .water {
+  pointer-events: none;
+}
+
+.map path.lake {
+  fill: var(--water);
+  stroke: var(--water-edge);
+  stroke-width: 0.6;
+  fill-rule: evenodd;
+}
+
+.map .lake-label {
+  font-size: 11px;
+  font-style: italic;
+  fill: var(--water-ink);
+  text-anchor: middle;
+  stroke: var(--paper);
+  stroke-width: 3px;
+  stroke-opacity: 0.8;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+
 .map[data-metrics] a path:hover {
-  fill-opacity: 1;
+  fill: inherit;
 }
 
 .map path.hover {
@@ -259,9 +307,9 @@ input:focus, button:focus-visible, a:focus-visible {
 }
 
 .map path.grp {
-  fill: var(--accent) !important;
-  fill-opacity: 1;
+  fill: var(--on) !important;
   stroke: var(--ink);
+  stroke-width: 1;
 }
 
 .map svg {
@@ -297,7 +345,8 @@ input:focus, button:focus-visible, a:focus-visible {
   padding: 0.15rem 0.45rem;
   font-size: 0.9rem;
   line-height: 1.3;
-  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  background: var(--field);
+  border-color: var(--rule);
 }
 
 .map:not(.zoomed) .map-tools .reset {
@@ -320,20 +369,21 @@ input:focus, button:focus-visible, a:focus-visible {
 
 .switch {
   display: inline-flex;
-  border: 1px solid var(--land-edge);
-  border-radius: 2px;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .switch button {
   border: 0;
   border-radius: 0;
-  background: var(--paper);
+  background: var(--field);
   font-size: 0.85rem;
   padding: 0.25rem 0.65rem;
 }
 
 .switch button + button {
-  border-left: 1px solid var(--land-edge);
+  border-left: 1px solid var(--edge);
 }
 
 .switch button[aria-pressed="true"] {
@@ -360,7 +410,7 @@ input:focus, button:focus-visible, a:focus-visible {
 }
 
 .legend text {
-  font: 10px ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10px;
   fill: var(--muted);
 }
 
@@ -370,11 +420,11 @@ input:focus, button:focus-visible, a:focus-visible {
   pointer-events: none;
   max-width: 17rem;
   padding: 0.5rem 0.65rem;
-  background: var(--paper);
+  background: var(--field);
   color: var(--ink);
-  border: 1px solid var(--ink);
-  border-radius: 2px;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 0.18);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
   font-size: 0.85rem;
   line-height: 1.35;
   opacity: 0;
@@ -387,7 +437,7 @@ input:focus, button:focus-visible, a:focus-visible {
 
 .tip strong {
   display: block;
-  font-weight: normal;
+  font-weight: 600;
   font-size: 1rem;
 }
 
@@ -413,50 +463,8 @@ input:focus, button:focus-visible, a:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-tr.hl {
-  background: color-mix(in srgb, var(--on) 22%, transparent);
-}
-
-.chart {
-  margin: 0;
-}
-
-.chart figcaption {
-  margin-top: 0.25rem;
-}
-
-.chart svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.chart .axis text {
-  font: 10px ui-monospace, Menlo, Consolas, monospace;
-  fill: var(--muted);
-}
-
-.chart .axis line {
-  stroke: var(--rule);
-}
-
-.chart .bar rect {
-  fill: var(--land-edge);
-  transition: fill 0.15s;
-}
-
-.chart .bar.hl rect, .chart .bar:hover rect, .chart .bar:focus rect {
-  fill: var(--on);
-}
-
-.chart .bar text {
-  font-size: 12px;
-  fill: var(--ink);
-}
-
-.chart .bar .value {
-  fill: var(--muted);
-  font-variant-numeric: tabular-nums;
+tr.hl, .seats li.hl {
+  background: color-mix(in srgb, var(--on) 16%, transparent);
 }
 
 .pick svg {
@@ -464,7 +472,7 @@ tr.hl {
 }
 
 .marker {
-  fill: var(--accent);
+  fill: var(--on);
   stroke: var(--paper);
   stroke-width: 2;
   pointer-events: none;
@@ -504,16 +512,141 @@ th, td {
 }
 
 th {
-  font-weight: normal;
+  font-weight: 600;
+  font-size: 0.85rem;
   color: var(--muted);
-  border-bottom-color: var(--ink);
+  border-bottom-color: var(--edge);
   white-space: nowrap;
 }
 
 th[aria-sort] {
   color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
+}
+
+th[aria-sort]::after {
+  content: " \2193";
+}
+
+th[aria-sort="ascending"]::after {
+  content: " \2191";
+}
+
+th a {
+  color: inherit;
+}
+
+td.muted {
+  color: var(--muted);
+}
+
+table.short tr.more {
+  display: none;
+}
+
+.more-link {
+  margin: 0.5rem 0 0;
+}
+
+@media (max-width: 40rem) {
+  .wide {
+    display: none;
+  }
+}
+
+.seats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.seats > li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.seats summary {
+  display: grid;
+  grid-template-columns: 1rem minmax(8rem, 14rem) 1fr 6rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.seats summary::-webkit-details-marker {
+  display: none;
+}
+
+.seats summary::before {
+  content: "\25B8";
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.seats details[open] summary::before {
+  content: "\25BE";
+}
+
+.seats .bar {
+  display: block;
+  height: 0.6rem;
+  background: var(--land);
+  border-radius: 2px;
+}
+
+.seats .bar i {
+  display: block;
+  height: 100%;
+  background: var(--seq-3);
+  border-radius: 2px;
+}
+
+.seats li.hl .bar i {
+  background: var(--on);
+}
+
+.seats .wards {
+  padding: 0.25rem 0 0.75rem 1.75rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 40rem) {
+  .seats summary {
+    grid-template-columns: 1rem 1fr 5.5rem;
+  }
+  .seats .bar {
+    display: none;
+  }
+}
+
+.offices-box > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.offices-box > summary::-webkit-details-marker {
+  display: none;
+}
+
+.offices-box > summary h2 {
+  display: inline-block;
+}
+
+.offices-box > summary h2::before {
+  content: "\25B8";
+  display: inline-block;
+  width: 1.25rem;
+  color: var(--muted);
+  font-size: 0.8em;
+}
+
+.offices-box[open] > summary h2::before {
+  content: "\25BE";
+}
+
+.offices-box > summary h2 {
+  border: 0;
 }
 
 .n {
@@ -676,7 +809,7 @@ tbody tr:hover {
 }
 
 .doc .base {
-  border-left: 3px solid var(--on);
+  border-left: 3px solid var(--accent);
   padding: 0.4rem 0 0.4rem 0.75rem;
   background: color-mix(in srgb, var(--land) 40%, transparent);
 }

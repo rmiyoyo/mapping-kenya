@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log"
+	"math"
 	"net/http"
 	"slices"
 	"strconv"
@@ -40,6 +41,7 @@ var funcs = template.FuncMap{
 	"coord":           coord,
 	"km":              km,
 	"title":           titleCase,
+	"short":           func(name string) string { return strings.TrimSuffix(name, " County") },
 	"countyURL":       countyURL,
 	"constituencyURL": constituencyURL,
 	"wardURL":         wardURL,
@@ -111,6 +113,7 @@ type homeData struct {
 	Map            *mapView
 	Counties       []countyRow
 	Sort           string
+	All            bool
 	Voters         kenyageo.VoterTotal
 	Constituencies int
 	Wards          int
@@ -128,10 +131,10 @@ var sorts = map[string]func(a, b countyRow) int{
 }
 
 func (s *site) home(w http.ResponseWriter, r *http.Request) {
-	d := homeData{Map: s.maps.country.with("population density voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
+	d := homeData{Map: s.maps.country.with("population density voters area", false), Sort: r.URL.Query().Get("sort"), All: r.URL.Query().Has("all"), Voters: s.geo.NationalVoters()}
 	by, ok := sorts[d.Sort]
 	if !ok {
-		d.Sort, by = "code", sorts["code"]
+		d.Sort, by = "population", sorts["population"]
 	}
 	for _, c := range s.geo.Counties() {
 		v, _ := s.geo.CountyVoters(c.Code)
@@ -147,19 +150,12 @@ type constituencyGroup struct {
 	Name   string
 	Voters kenyageo.VoterTotal
 	Wards  []kenyageo.Ward
-}
-
-type constituencyBar struct {
-	Name   string `json:"name"`
-	Href   string `json:"href"`
-	Voters int    `json:"voters"`
-	Wards  int    `json:"wards"`
+	Share  float64
 }
 
 type countyData struct {
 	County         kenyageo.County
 	Map            *mapView
-	Chart          []constituencyBar
 	Voters         kenyageo.VoterTotal
 	Neighbours     []kenyageo.County
 	Constituencies []constituencyGroup
@@ -193,7 +189,15 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 		g.Voters, _ = s.geo.ConstituencyVoters(name)
 		d.Wards += len(g.Wards)
 		d.Constituencies = append(d.Constituencies, g)
-		d.Chart = append(d.Chart, constituencyBar{Name: name, Href: constituencyURL(name), Voters: g.Voters.RegisteredVoters2022, Wards: len(g.Wards)})
+	}
+	most := 0
+	for _, g := range d.Constituencies {
+		most = max(most, g.Voters.RegisteredVoters2022)
+	}
+	for i := range d.Constituencies {
+		if most > 0 {
+			d.Constituencies[i].Share = math.Round(1000*float64(d.Constituencies[i].Voters.RegisteredVoters2022)/float64(most)) / 10
+		}
 	}
 	s.render(w, r, http.StatusOK, "county", page{Title: c.Name, Data: d})
 }

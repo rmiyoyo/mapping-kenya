@@ -37,6 +37,7 @@ type mapView struct {
 	Scale   float64
 	Shapes  []shape
 	Outline string
+	Lakes   []lakeShape
 	Marker  *point
 	Pick    bool
 	Metrics string
@@ -162,7 +163,10 @@ func buildMaps(geo *kenyageo.Data) maps {
 		return out
 	}
 
+	lakes := loadLakes()
+	all[0] = min(all[0], 33.25)
 	out.country = newMap("Map of Kenya's 47 counties", all, 640, 720, 6)
+	out.country.addLakes(lakes, all, 0.8)
 	for _, c := range counties {
 		if g, ok := outlines[c.Code]; ok {
 			st := &shapeStats{Population: c.Population, AreaKm2: c.AreaKm2, Density: c.Density()}
@@ -186,6 +190,7 @@ func buildMaps(geo *kenyageo.Data) maps {
 		}
 		m := newMap("Map of the wards of "+c.Name, bounds(g), 640, 640, 6)
 		m.Outline = m.path(g, 0.5)
+		m.addLakes(lakes, bounds(g), 0.5)
 		for _, w := range geo.WardsInCounty(c.Code) {
 			f, ok := geo.WardBoundary(w.Code)
 			if !ok {

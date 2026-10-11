@@ -59,6 +59,7 @@
     var box = svg.node().viewBox.baseVal;
     var shapes = layer.selectAll("path[data-key]");
     var marker = layer.select(".marker");
+    var labels = layer.selectAll(".lake-label");
     shapes.selectAll("title").remove();
 
     var zoom = d3.zoom()
@@ -70,6 +71,7 @@
       .on("zoom", function (event) {
         layer.attr("transform", event.transform);
         marker.attr("r", 5 / event.transform.k);
+        labels.style("font-size", 11 / event.transform.k + "px");
         figure.classList.toggle("zoomed", event.transform.k > 1.01);
       });
     svg.call(zoom).on("dblclick.zoom", null);
@@ -117,8 +119,9 @@
         var el = this;
         hooks.leave.forEach(function (f) { f(el); });
       });
-    marker.raise();
     layer.select(".outline").raise();
+    layer.select(".water").raise();
+    marker.raise();
 
     return { figure: figure, shapes: shapes, hooks: hooks, zoomTo: zoomTo };
   }
@@ -140,7 +143,7 @@
         .on("click", function (event, m) { apply(m, true); });
     }
 
-    var colours = d3.quantize(d3.interpolateLab(token("--scale-lo"), token("--scale-hi")), 6);
+    var colours = [1, 2, 3, 4, 5].map(function (i) { return token("--seq-" + i); });
 
     function apply(metric, animate) {
       controls.selectAll("button").attr("aria-pressed", function (m) { return m === metric; });
@@ -199,48 +202,18 @@
     map.hooks.leave.push(function () { rows.classed("hl", false); });
   }
 
-  function constituencyChart(figure, map) {
-    var data = JSON.parse(figure.querySelector("script").textContent);
-    data.sort(function (a, b) { return d3.descending(a.voters, b.voters); });
-
-    var width = Math.max(280, Math.round(figure.getBoundingClientRect().width)) || 400;
-    var bar = 18, gap = 5, label = Math.min(150, Math.round(width * 0.36)), right = 64;
-    var height = data.length * (bar + gap) + 24;
-    var x = d3.scaleLinear().domain([0, d3.max(data, function (d) { return d.voters; })]).nice().range([label, width - right]);
-
-    var svg = d3.select(figure).insert("svg", "figcaption")
-      .attr("viewBox", "0 0 " + width + " " + height)
-      .attr("role", "img")
-      .attr("aria-label", "Registered voters by constituency");
-
-    svg.append("g").attr("class", "axis").attr("transform", "translate(0,18)")
-      .call(d3.axisTop(x).ticks(5, "~s").tickSize(-(height - 18)))
-      .call(function (g) { g.select(".domain").remove(); });
-
-    var rows = svg.selectAll("a.bar").data(data).join("a")
-      .attr("class", "bar")
-      .attr("href", function (d) { return d.href; })
-      .attr("transform", function (d, i) { return "translate(0," + (24 + i * (bar + gap)) + ")"; });
-
-    rows.append("text").attr("class", "name").attr("x", label - 8).attr("y", bar / 2).attr("dy", "0.35em")
-      .attr("text-anchor", "end").text(function (d) { return d.name; });
-    rows.append("rect").attr("x", label).attr("height", bar).attr("width", 0)
-      .transition().duration(700).delay(function (d, i) { return i * 40; })
-      .attr("width", function (d) { return x(d.voters) - label; });
-    rows.append("text").attr("class", "value").attr("y", bar / 2).attr("dy", "0.35em")
-      .attr("x", function (d) { return x(d.voters) + 6; })
-      .text(function (d) { return whole(d.voters); });
-
-    if (!map) return;
-    function mark(name, on) {
-      map.shapes.classed("grp", function () { return on && this.getAttribute("data-group") === name; });
-      rows.classed("hl", function (d) { return on && d.name === name; });
+  function linkSeats(map) {
+    var rows = d3.selectAll(".seats li[data-group]");
+    if (rows.empty()) return;
+    function mark(name) {
+      map.shapes.classed("grp", function () { return !!name && this.getAttribute("data-group") === name; });
+      rows.classed("hl", function () { return !!name && this.getAttribute("data-group") === name; });
     }
     rows
-      .on("mouseenter focus", function (event, d) { mark(d.name, true); })
-      .on("mouseleave blur", function () { mark("", false); });
-    map.hooks.enter.push(function (el) { mark(el.getAttribute("data-group"), true); });
-    map.hooks.leave.push(function () { mark("", false); });
+      .on("mouseenter", function () { mark(this.getAttribute("data-group")); })
+      .on("mouseleave", function () { mark(""); });
+    map.hooks.enter.push(function (el) { mark(el.getAttribute("data-group")); });
+    map.hooks.leave.push(function () { mark(""); });
   }
 
   var maps = [];
@@ -251,7 +224,11 @@
     choropleth(m);
   });
   if (maps.length) linkTable(maps[0]);
-  d3.selectAll("figure.chart[data-chart=constituencies]").each(function () {
-    constituencyChart(this, maps[0]);
+  if (maps.length) linkSeats(maps[0]);
+
+  d3.selectAll("[data-expand]").on("click", function (event) {
+    event.preventDefault();
+    d3.selectAll("table.short").classed("short", false);
+    d3.select(this.parentNode).remove();
   });
 })();

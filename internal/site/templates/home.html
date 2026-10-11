@@ -10,34 +10,35 @@
 
 <h2 id="counties">Counties</h2>
 <div class="scroll">
-<table class="counties">
+<table class="counties{{if not .All}} short{{end}}">
   <thead>
     <tr>
       {{template "sorthead" (list "code" "No." .Sort false)}}
       {{template "sorthead" (list "name" "County" .Sort false)}}
-      <th>Headquarters</th>
+      <th class="wide">Headquarters</th>
       {{template "sorthead" (list "population" "Population" .Sort true)}}
-      {{template "sorthead" (list "area" "Area, km²" .Sort true)}}
-      {{template "sorthead" (list "density" "People per km²" .Sort true)}}
+      {{template "sorthead" (list "area" "Area, km²" .Sort true "wide")}}
+      {{template "sorthead" (list "density" "People per km²" .Sort true "wide")}}
       {{template "sorthead" (list "voters" "Voters, 2022" .Sort true)}}
     </tr>
   </thead>
   <tbody>
-  {{- range .Counties}}
-    <tr data-key="{{.Code}}">
-      <td>{{.Code}}</td>
-      <td><a href="{{countyURL .Code}}">{{.Name}}</a></td>
-      <td>{{.Headquarters}}</td>
+  {{- range $i, $c := .Counties}}
+    <tr data-key="{{.Code}}"{{if ge $i 10}} class="more"{{end}}>
+      <td class="muted">{{.Code}}</td>
+      <td><a href="{{countyURL .Code}}">{{short .Name}}</a></td>
+      <td class="wide">{{.Headquarters}}</td>
       <td class="n">{{num .Population}}</td>
-      <td class="n">{{decimal .AreaKm2}}</td>
-      <td class="n">{{num (round .Density)}}</td>
+      <td class="n wide">{{decimal .AreaKm2}}</td>
+      <td class="n wide">{{num (round .Density)}}</td>
       <td class="n">{{template "voters" .Voters}}</td>
     </tr>
   {{- end}}
   </tbody>
 </table>
 </div>
+{{if not .All}}<p class="more-link"><a href="/?sort={{.Sort}}&amp;all#counties" data-expand>Show all {{len .Counties}} counties</a></p>{{end}}
 <p class="note" id="incomplete">* Della ward in Eldas, Wajir has no registered voter figure, so totals that include it are slightly low.</p>
 {{end}}{{end}}
 
-{{define "sorthead"}}{{$key := index . 0}}{{$label := index . 1}}{{$sort := index . 2}}{{$num := index . 3}}<th{{if $num}} class="n"{{end}}{{if eq $key $sort}} aria-sort="{{if $num}}descending{{else}}ascending{{end}}"{{end}}>{{if eq $key $sort}}{{$label}}{{else}}<a href="/?sort={{$key}}#counties">{{$label}}</a>{{end}}</th>{{end}}
+{{define "sorthead"}}{{$key := index . 0}}{{$label := index . 1}}{{$sort := index . 2}}{{$num := index . 3}}{{$extra := ""}}{{if gt (len .) 4}}{{$extra = index . 4}}{{end}}<th{{if $num}} class="n{{with $extra}} {{.}}{{end}}"{{end}}{{if eq $key $sort}} aria-sort="{{if $num}}descending{{else}}ascending{{end}}"{{end}}>{{if eq $key $sort}}{{$label}}{{else}}<a href="/?sort={{$key}}#counties">{{$label}}</a>{{end}}</th>{{end}}
