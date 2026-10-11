@@ -21,6 +21,13 @@
     <h2 class="small">Borders</h2>
     <p>{{range $i, $c := .}}{{if $i}}, {{end}}<a href="{{countyURL $c.Code}}">{{$c.Name}}</a>{{end}}</p>
     {{end}}
+    {{with .Chart}}
+    <h2 class="small">Voters by constituency</h2>
+    <figure class="chart" data-chart="constituencies">
+      <script type="application/json">{{.}}</script>
+      <figcaption class="note">Registered voters in 2022. Point at a bar to see its wards on the map.</figcaption>
+    </figure>
+    {{end}}
   </div>
 </div>
 

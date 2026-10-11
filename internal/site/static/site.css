@@ -12,6 +12,8 @@
   --tok-str: #3c6a45;
   --tok-num: #2d5c86;
   --tok-lit: #8a5a12;
+  --scale-lo: #efe6d3;
+  --scale-hi: #8a2b1d;
   color-scheme: light;
 }
 
@@ -30,6 +32,8 @@
     --tok-str: #9ccaa3;
     --tok-num: #94bce0;
     --tok-lit: #e0b872;
+    --scale-lo: #34302a;
+    --scale-hi: #f2a684;
     color-scheme: dark;
   }
 }
@@ -206,6 +210,7 @@ input:focus, button:focus-visible, a:focus-visible {
 }
 
 .map {
+  position: relative;
   margin: 0;
 }
 
@@ -225,6 +230,7 @@ input:focus, button:focus-visible, a:focus-visible {
   stroke: var(--land-edge);
   stroke-width: 0.6;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .map a path:hover, .pick path:hover {
@@ -241,6 +247,216 @@ input:focus, button:focus-visible, a:focus-visible {
   stroke: var(--muted);
   stroke-width: 1;
   pointer-events: none;
+}
+
+.map[data-metrics] a path:hover {
+  fill-opacity: 1;
+}
+
+.map path.hover {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.map path.grp {
+  fill: var(--accent) !important;
+  fill-opacity: 1;
+  stroke: var(--ink);
+}
+
+.map svg {
+  touch-action: pan-y !important;
+}
+
+.map.zoomed svg {
+  cursor: grab;
+}
+
+.map.zoomed svg:active {
+  cursor: grabbing;
+}
+
+.pick svg, .pick.zoomed svg {
+  cursor: crosshair;
+}
+
+.map-tools {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.map-controls + svg + .map-tools {
+  top: 2.75rem;
+}
+
+.map-tools button {
+  min-width: 2rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+}
+
+.map:not(.zoomed) .map-tools .reset {
+  display: none;
+}
+
+.map-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.map-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.switch {
+  display: inline-flex;
+  border: 1px solid var(--land-edge);
+  border-radius: 2px;
+}
+
+.switch button {
+  border: 0;
+  border-radius: 0;
+  background: var(--paper);
+  font-size: 0.85rem;
+  padding: 0.25rem 0.65rem;
+}
+
+.switch button + button {
+  border-left: 1px solid var(--land-edge);
+}
+
+.switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.legend {
+  margin-top: 0.4rem;
+  max-width: 20rem;
+}
+
+.legend-title {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.legend svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.legend text {
+  font: 10px ui-monospace, Menlo, Consolas, monospace;
+  fill: var(--muted);
+}
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  max-width: 17rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.18);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.tip.on {
+  opacity: 1;
+}
+
+.tip strong {
+  display: block;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.tip .tip-group {
+  display: block;
+  color: var(--muted);
+}
+
+.tip dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.1rem 0.75rem;
+  margin: 0.35rem 0 0;
+}
+
+.tip dt {
+  color: var(--muted);
+}
+
+.tip dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+tr.hl {
+  background: color-mix(in srgb, var(--on) 22%, transparent);
+}
+
+.chart {
+  margin: 0;
+}
+
+.chart figcaption {
+  margin-top: 0.25rem;
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart .axis text {
+  font: 10px ui-monospace, Menlo, Consolas, monospace;
+  fill: var(--muted);
+}
+
+.chart .axis line {
+  stroke: var(--rule);
+}
+
+.chart .bar rect {
+  fill: var(--land-edge);
+  transition: fill 0.15s;
+}
+
+.chart .bar.hl rect, .chart .bar:hover rect, .chart .bar:focus rect {
+  fill: var(--on);
+}
+
+.chart .bar text {
+  font-size: 12px;
+  fill: var(--ink);
+}
+
+.chart .bar .value {
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .pick svg {

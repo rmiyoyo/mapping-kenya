@@ -128,7 +128,7 @@ var sorts = map[string]func(a, b countyRow) int{
 }
 
 func (s *site) home(w http.ResponseWriter, r *http.Request) {
-	d := homeData{Map: s.maps.country, Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
+	d := homeData{Map: s.maps.country.with("population density voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
 	by, ok := sorts[d.Sort]
 	if !ok {
 		d.Sort, by = "code", sorts["code"]
@@ -149,9 +149,17 @@ type constituencyGroup struct {
 	Wards  []kenyageo.Ward
 }
 
+type constituencyBar struct {
+	Name   string `json:"name"`
+	Href   string `json:"href"`
+	Voters int    `json:"voters"`
+	Wards  int    `json:"wards"`
+}
+
 type countyData struct {
 	County         kenyageo.County
 	Map            *mapView
+	Chart          []constituencyBar
 	Voters         kenyageo.VoterTotal
 	Neighbours     []kenyageo.County
 	Constituencies []constituencyGroup
@@ -175,7 +183,7 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 	}
 	d := countyData{
 		County:      c,
-		Map:         s.maps.counties[c.Code],
+		Map:         s.maps.counties[c.Code].with("voters", false),
 		Neighbours:  s.geo.NeighbouringCounties(c.Code),
 		PostOffices: s.geo.PostOfficesInCounty(c.Code),
 	}
@@ -185,6 +193,7 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 		g.Voters, _ = s.geo.ConstituencyVoters(name)
 		d.Wards += len(g.Wards)
 		d.Constituencies = append(d.Constituencies, g)
+		d.Chart = append(d.Chart, constituencyBar{Name: name, Href: constituencyURL(name), Voters: g.Voters.RegisteredVoters2022, Wards: len(g.Wards)})
 	}
 	s.render(w, r, http.StatusOK, "county", page{Title: c.Name, Data: d})
 }
@@ -212,7 +221,7 @@ func (s *site) constituency(w http.ResponseWriter, r *http.Request) {
 	for _, w := range wards {
 		in[w.Code] = true
 	}
-	d.Map = s.maps.counties[d.County.Code].highlight(func(k string) bool { return in[k] })
+	d.Map = s.maps.counties[d.County.Code].highlight(func(k string) bool { return in[k] }).with("", true)
 	for _, name := range s.geo.Constituencies(d.County.Code) {
 		if name != d.Name {
 			d.Others = append(d.Others, name)
@@ -238,7 +247,7 @@ func (s *site) ward(w http.ResponseWriter, r *http.Request) {
 	}
 	d := wardData{Ward: ward}
 	d.County, _ = s.geo.CountyByCode(ward.CountyCode)
-	d.Map = s.maps.counties[ward.CountyCode].highlight(func(k string) bool { return k == ward.Code })
+	d.Map = s.maps.counties[ward.CountyCode].highlight(func(k string) bool { return k == ward.Code }).with("", true)
 	for _, sib := range s.geo.WardsInConstituency(ward.Constituency) {
 		if sib.Code != ward.Code {
 			d.Siblings = append(d.Siblings, sib)

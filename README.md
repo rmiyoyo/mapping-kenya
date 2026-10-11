@@ -27,8 +27,8 @@ docker run -p 8080:8080 mapping-kenya
 
 | Page | Shows |
 | --- | --- |
-| `/` | a map of the 47 counties and a table you can sort by population, area, density or voters |
-| `/counties/32` | a county's wards on a map, its census figures, neighbours, constituencies and post offices |
+| `/` | a map of the 47 counties, shaded by population, density, voters or area, and a table you can sort by each |
+| `/counties/32` | a county's wards on a map shaded by registered voters, a chart of voters by constituency, its census figures, neighbours and post offices |
 | `/constituencies/Kibra` | a constituency's wards, highlighted on the county map |
 | `/wards/0040` | one ward, its nearest post offices and the other wards in its constituency |
 | `/postcodes/00100` | a post office, where it is and which ward it falls in |
@@ -38,7 +38,12 @@ docker run -p 8080:8080 mapping-kenya
 | `/api/` | the API documentation |
 | `/api/...` | the JSON API from kenya-geo's `api` package |
 
-The pages are plain HTML rendered on the server. The only JavaScript turns a click on the map, or your browser's location, into coordinates.
+The pages are plain HTML rendered on the server, and they work without JavaScript. [D3](https://d3js.org) then makes the maps interactive:
+
+- Every map zooms and pans: drag, pinch, use the + and − buttons, or hold Ctrl and scroll. Ward and constituency pages start zoomed in on the place.
+- Pointing at a county or ward shows its figures in a tooltip.
+- The home map is shaded by population, density, registered voters or area, with a switch and a legend. On the home page, pointing at a county also highlights its row in the table, and the other way round.
+- County maps are shaded by registered voters per ward, beside a bar chart of voters by constituency. Pointing at a bar highlights that constituency's wards on the map, and pointing at a ward highlights its bar.
 
 ## The API documentation
 
@@ -79,6 +84,8 @@ For anyone reading the code to learn Go:
 - The maps are SVG drawn in Go. `internal/site/maps.go` projects longitude and latitude straight onto x and y (close enough this near the equator), drops points that land within a pixel of the previous one, and writes the result as SVG path data. All 48 maps are drawn once at startup, and a page copies the one it needs to highlight a ward or add a marker.
 - Routes use the method and wildcard patterns `http.ServeMux` gained in Go 1.22, such as `GET /wards/{code}`, read back with `r.PathValue("code")`. `GET /api/{$}` matches only `/api/` itself, so it can serve the docs while the broader `/api/` pattern hands everything below it to kenya-geo's API handler through `http.StripPrefix`.
 - Each page renders into a buffer before anything is written, so a template error becomes a clean 500 instead of half a page.
+- The D3 code in `internal/site/static/charts.js` is progressive enhancement: it never fetches data. The server writes each county's and ward's figures onto its SVG path as `data-` attributes (`data-population`, `data-voters` and so on), and the constituency chart's data as JSON inside a `<script type="application/json">` tag, which `html/template` encodes safely for that spot. D3 reads those, then uses `d3.scaleQuantile` to split the values into six equal-sized colour bands, `d3.zoom` to move a `<g>` that wraps the shapes, and `d3.axisTop` for the chart. If D3 fails to load, the plain maps still work.
+- D3 7.9.0 loads from jsDelivr with a Subresource Integrity hash, so the browser refuses the file if the CDN ever serves different bytes.
 
 ## Tests
 

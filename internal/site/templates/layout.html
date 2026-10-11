@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{if .Title}}{{.Title}} · {{end}}Kenya Geo</title>
 <link rel="stylesheet" href="/static/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous" defer></script>
 <script src="/static/site.js" defer></script>
+<script src="/static/charts.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -33,13 +35,14 @@
 {{end}}
 
 {{define "map"}}
-<figure class="map{{if .Pick}} pick{{end}}">
+<figure class="map{{if .Pick}} pick{{end}}"{{with .Metrics}} data-metrics="{{.}}"{{end}}{{if .Focus}} data-focus{{end}}>
   <svg viewBox="0 0 {{.W}} {{.H}}" role="img" aria-label="{{.Label}}" data-lng0="{{.Lng0}}" data-lat0="{{.Lat0}}" data-scale="{{.Scale}}">
+    <g class="layer">
     {{- range .Shapes}}
     {{- if and .Href (not $.Pick)}}
-    <a href="{{.Href}}"><path d="{{.D}}"{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path></a>
+    <a href="{{.Href}}">{{template "shape" .}}</a>
     {{- else}}
-    <path d="{{.D}}"{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>
+    {{template "shape" .}}
     {{- end}}
     {{- end}}
     {{- with .Outline}}
@@ -48,9 +51,12 @@
     {{- with .Marker}}
     <circle class="marker" cx="{{.X}}" cy="{{.Y}}" r="5"/>
     {{- end}}
+    </g>
   </svg>
 </figure>
 {{end}}
+
+{{define "shape"}}<path d="{{.D}}" data-key="{{.Key}}" data-name="{{.Name}}"{{with .Group}} data-group="{{.}}"{{end}}{{with .Stats}}{{if .Population}} data-population="{{.Population}}" data-area="{{.AreaKm2}}" data-density="{{.Density}}"{{end}}{{with .Voters}} data-voters="{{.}}"{{end}}{{end}}{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>{{end}}
 
 {{define "voters"}}{{num .RegisteredVoters2022}}{{if not .Complete}}<sup><a href="#incomplete" title="One or more wards have no figure">*</a></sup>{{end}}{{end}}
 

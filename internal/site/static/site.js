@@ -7,7 +7,8 @@ document.querySelectorAll(".pick svg").forEach(function (svg) {
     var pt = svg.createSVGPoint();
     pt.x = e.clientX;
     pt.y = e.clientY;
-    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var layer = svg.querySelector(".layer") || svg;
+    var p = pt.matrixTransform(layer.getScreenCTM().inverse());
     var scale = parseFloat(svg.dataset.scale);
     go(parseFloat(svg.dataset.lat0) - p.y / scale, parseFloat(svg.dataset.lng0) + p.x / scale);
   });
