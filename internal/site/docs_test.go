@@ -76,3 +76,18 @@ func TestEndpoint(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceURL(t *testing.T) {
+	for version, ref := range map[string]string{
+		"v0.3.0":                               "v0.3.0",
+		"main":                                 "main",
+		"v0.2.1-0.20261011014517-f73b1d7a1074": "f73b1d7a1074",
+		"v0.0.0-20261011014517-f73b1d7a1074":   "f73b1d7a1074",
+		"v0.3.0-rc.1.0.20261011014517-f73b1d7a1074": "f73b1d7a1074",
+	} {
+		want := "https://github.com/rmiyoyo/kenya-geo/blob/" + ref + "/api/README.md"
+		if got := sourceURL(version); got != want {
+			t.Errorf("sourceURL(%q) = %q, want %q", version, got, want)
+		}
+	}
+}

@@ -118,26 +118,29 @@ func endpoint(s string) (method, path string, ok bool) {
 	return method, path, true
 }
 
-var pseudoVersion = regexp.MustCompile(`-\d{14}-([0-9a-f]{12})$`)
+var pseudoVersion = regexp.MustCompile(`\d{14}-([0-9a-f]{12})$`)
 
 func docsSource() (version, source string) {
-	version, ref := "", "main"
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, dep := range info.Deps {
 			if dep.Path != apiModule {
 				continue
 			}
 			if dep.Replace != nil {
-				version = "from a local copy"
-				break
+				return "from a local copy", sourceURL("main")
 			}
-			version, ref = dep.Version, dep.Version
-			if m := pseudoVersion.FindStringSubmatch(dep.Version); m != nil {
-				ref = m[1]
-			}
+			return dep.Version, sourceURL(dep.Version)
 		}
 	}
-	return version, "https://" + apiModule + "/blob/" + ref + "/api/README.md"
+	return "", sourceURL("main")
+}
+
+func sourceURL(version string) string {
+	ref := version
+	if m := pseudoVersion.FindStringSubmatch(version); m != nil {
+		ref = m[1]
+	}
+	return "https://" + apiModule + "/blob/" + ref + "/api/README.md"
 }
 
 type docRenderer struct{}
