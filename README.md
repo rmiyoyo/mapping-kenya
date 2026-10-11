@@ -27,8 +27,8 @@ docker run -p 8080:8080 mapping-kenya
 
 | Page | Shows |
 | --- | --- |
-| `/` | a map of the 47 counties, shaded by population, density, voters or area, and a table you can sort by each |
-| `/counties/32` | a county's wards on a map shaded by registered voters, a chart of voters by constituency, its census figures, neighbours and post offices |
+| `/` | a map of the 47 counties shaded by population, density, voters or area, the top ten for that measure, and a table of all 47 you can sort |
+| `/counties/32` | a county's wards on a map shaded by registered voters, its census figures, its constituencies ranked by voters, neighbours and post offices |
 | `/constituencies/Kibra` | a constituency's wards, highlighted on the county map |
 | `/wards/0040` | one ward, its nearest post offices and the other wards in its constituency |
 | `/postcodes/00100` | a post office, where it is and which ward it falls in |
@@ -42,8 +42,8 @@ The pages are plain HTML rendered on the server, and they work without JavaScrip
 
 - Every map zooms and pans: drag, pinch, use the + and − buttons, or hold Ctrl and scroll. Ward and constituency pages start zoomed in on the place.
 - Pointing at a county or ward shows its figures in a tooltip.
-- The home map is shaded by population, density, registered voters or area, with a switch and a legend. On the home page, pointing at a county also highlights its row in the table, and the other way round.
-- County maps are shaded by registered voters per ward, beside a bar chart of voters by constituency. Pointing at a bar highlights that constituency's wards on the map, and pointing at a ward highlights its bar.
+- The home map is shaded by population, density, registered voters or area, with a switch and a legend, and the top-ten list beside it re-ranks to match. Pointing at a county highlights it in the list and the table, and the other way round.
+- County maps are shaded by registered voters per ward. Pointing at a constituency in the list highlights its wards on the map, and pointing at a ward highlights its constituency.
 
 ## The API documentation
 
@@ -85,6 +85,8 @@ For anyone reading the code to learn Go:
 - Routes use the method and wildcard patterns `http.ServeMux` gained in Go 1.22, such as `GET /wards/{code}`, read back with `r.PathValue("code")`. `GET /api/{$}` matches only `/api/` itself, so it can serve the docs while the broader `/api/` pattern hands everything below it to kenya-geo's API handler through `http.StripPrefix`.
 - Each page renders into a buffer before anything is written, so a template error becomes a clean 500 instead of half a page.
 - The D3 code in `internal/site/static/charts.js` is progressive enhancement: it never fetches data. The server writes each county's and ward's figures onto its SVG path as `data-` attributes (`data-population`, `data-voters` and so on), and the constituency chart's data as JSON inside a `<script type="application/json">` tag, which `html/template` encodes safely for that spot. D3 reads those, then uses `d3.scaleQuantile` to split the values into six equal-sized colour bands, `d3.zoom` to move a `<g>` that wraps the shapes, and `d3.axisTop` for the chart. If D3 fails to load, the plain maps still work.
+- The colour scale has six steps between two tokens in `site.css`, `--scale-lo` and `--scale-hi`. Each step is a CSS `color-mix(in oklab, ...)` of the two, so the browser does the colour maths and a change of palette is a two-line edit.
+- Lake Victoria and Lake Turkana come from [Natural Earth](https://www.naturalearthdata.com/)'s public-domain 1:10m lakes, cut down to those two in `internal/site/lakes.json` and drawn over the counties, since Kenya's county boundaries run out into the water. Smaller lakes such as Nakuru and Naivasha are holes in the county boundaries, so the maps fill those holes with water too.
 - D3 7.9.0 loads from jsDelivr with a Subresource Integrity hash, so the browser refuses the file if the CDN ever serves different bytes.
 
 ## Tests

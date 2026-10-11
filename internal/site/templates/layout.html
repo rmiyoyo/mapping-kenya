@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{if .Title}}{{.Title}} · {{end}}Kenya Geo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
 <link rel="stylesheet" href="/static/site.css">
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous" defer></script>
 <script src="/static/site.js" defer></script>
@@ -27,7 +30,7 @@
 {{template "content" .}}
 </main>
 <footer>
-  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, post offices from GeoNames and OpenStreetMap.</p>
+  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, Lake Victoria and Lake Turkana from Natural Earth, post offices from GeoNames and OpenStreetMap.</p>
   <p>Boundaries are simplified, so treat anything near a line as approximate.</p>
 </footer>
 </body>
@@ -38,6 +41,9 @@
 <figure class="map{{if .Pick}} pick{{end}}"{{with .Metrics}} data-metrics="{{.}}"{{end}}{{if .Focus}} data-focus{{end}}>
   <svg viewBox="0 0 {{.W}} {{.H}}" role="img" aria-label="{{.Label}}" data-lng0="{{.Lng0}}" data-lat0="{{.Lat0}}" data-scale="{{.Scale}}">
     <g class="layer">
+    {{- with .Holes}}
+    <path class="water holes" d="{{.}}"/>
+    {{- end}}
     {{- range .Shapes}}
     {{- if and .Href (not $.Pick)}}
     <a href="{{.Href}}">{{template "shape" .}}</a>
@@ -45,6 +51,12 @@
     {{template "shape" .}}
     {{- end}}
     {{- end}}
+    {{- range .Water}}
+    <path class="water" d="{{.D}}"><title>{{.Name}}</title></path>
+    {{- end}}
+    {{- range .Water}}{{$name := .Name}}{{$angle := .Angle}}{{with .Label}}
+    <text class="water-label" x="{{.X}}" y="{{.Y}}" transform="rotate({{$angle}} {{.X}} {{.Y}})">{{$name}}</text>
+    {{- end}}{{end}}
     {{- with .Outline}}
     <path class="outline" d="{{.}}"/>
     {{- end}}

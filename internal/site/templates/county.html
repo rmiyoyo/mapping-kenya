@@ -3,54 +3,50 @@
 <h1>{{.County.Name}}</h1>
 <p class="lede">County {{.County.Code}} · {{.County.ISOCode}} · formerly {{.County.FormerProvince}} Province · headquarters {{.County.Headquarters}}</p>
 
-<div class="split">
-  {{with .Map}}{{template "map" .}}{{else}}<p class="note">No boundary is known for this county.</p>{{end}}
-  <div>
-    <dl class="facts">
-      <dt>Population, 2019</dt><dd>{{num .County.Population}}</dd>
-      <dt>Men, women, intersex</dt><dd>{{num .County.PopulationMale}}, {{num .County.PopulationFemale}}, {{num .County.PopulationIntersex}}</dd>
-      <dt>Area</dt><dd>{{decimal .County.AreaKm2}} km²</dd>
-      <dt>Density</dt><dd>{{num (round .County.Density)}} people per km²</dd>
-      <dt>Registered voters, 2022</dt><dd>{{template "voters" .Voters}}</dd>
-      <dt>Constituencies</dt><dd>{{len .Constituencies}}</dd>
-      <dt>Wards</dt><dd>{{.Wards}}</dd>
-      <dt>Post offices</dt><dd>{{len .PostOffices}}</dd>
-      <dt>Centre</dt><dd><a href="{{atURL .County.Centroid.Lat .County.Centroid.Lng}}">{{coord .County.Centroid.Lat}}, {{coord .County.Centroid.Lng}}</a></dd>
+<div class="atlas">
+  <div class="atlas-map">
+    {{with .Map}}{{template "map" .}}{{else}}<p class="note">No boundary is known for this county.</p>{{end}}
+  </div>
+  <div class="atlas-side">
+    <dl class="stats">
+      <div><dt>Population, 2019</dt><dd>{{num .County.Population}}</dd></div>
+      <div><dt>Voters, 2022</dt><dd>{{template "voters" .Voters}}</dd></div>
+      <div><dt>Area, km²</dt><dd>{{decimal .County.AreaKm2}}</dd></div>
+      <div><dt>People per km²</dt><dd>{{num (round .County.Density)}}</dd></div>
     </dl>
-    {{with .Neighbours}}
-    <h2 class="small">Borders</h2>
-    <p>{{range $i, $c := .}}{{if $i}}, {{end}}<a href="{{countyURL $c.Code}}">{{$c.Name}}</a>{{end}}</p>
-    {{end}}
-    {{with .Chart}}
-    <h2 class="small">Voters by constituency</h2>
-    <figure class="chart" data-chart="constituencies">
-      <script type="application/json">{{.}}</script>
-      <figcaption class="note">Registered voters in 2022. Point at a bar to see its wards on the map.</figcaption>
-    </figure>
-    {{end}}
+
+    <section aria-labelledby="constituencies-title">
+      <h2 id="constituencies-title" class="small">{{len .Constituencies}} constituencies · {{.Wards}} wards</h2>
+      <ol class="ranking constituencies">
+      {{- range .Constituencies}}
+        <li data-group="{{.Name}}">
+          <a href="{{constituencyURL .Name}}">{{.Name}}</a>
+          <span class="bar" style="--share: {{.Share}}"></span>
+          <span class="n value">{{template "voters" .Voters}}</span>
+        </li>
+      {{- end}}
+      </ol>
+      <p class="note">Registered voters in 2022. Point at a constituency to see its wards on the map.</p>
+    </section>
+
+    <dl class="facts">
+      <dt>Men, women, intersex</dt><dd>{{num .County.PopulationMale}}, {{num .County.PopulationFemale}}, {{num .County.PopulationIntersex}}</dd>
+      <dt>Centre</dt><dd><a href="{{atURL .County.Centroid.Lat .County.Centroid.Lng}}">{{coord .County.Centroid.Lat}}, {{coord .County.Centroid.Lng}}</a></dd>
+      {{with .Neighbours}}<dt>Borders</dt><dd>{{range $i, $c := .}}{{if $i}}, {{end}}<a href="{{countyURL $c.Code}}">{{$c.Name}}</a>{{end}}</dd>{{end}}
+    </dl>
   </div>
 </div>
-
-<h2>Constituencies and wards</h2>
-{{range .Constituencies}}
-<section class="group">
-  <h3><a href="{{constituencyURL .Name}}">{{.Name}}</a> <span class="aside">{{len .Wards}} wards · {{template "voters" .Voters}} voters</span></h3>
-  <ul class="wards">
-  {{- range .Wards}}
-    <li><a href="{{wardURL .Code}}">{{title .Name}}</a></li>
-  {{- end}}
-  </ul>
-</section>
-{{end}}
 
 {{if not .Voters.Complete}}<p class="note" id="incomplete">* Della ward has no registered voter figure, so this total is slightly low.</p>{{end}}
 
 {{with .PostOffices}}
-<h2>Post offices</h2>
-<ul class="offices">
-{{- range .}}
-  <li><a href="{{postcodeURL .Code}}">{{.Code}}</a> {{.Name}}</li>
-{{- end}}
-</ul>
+<details class="all">
+  <summary>{{len .}} post offices</summary>
+  <ul class="offices">
+  {{- range .}}
+    <li><a href="{{postcodeURL .Code}}">{{.Code}}</a> {{.Name}}</li>
+  {{- end}}
+  </ul>
+</details>
 {{end}}
 {{end}}{{end}}

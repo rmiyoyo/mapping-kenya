@@ -1,6 +1,8 @@
 package site
 
 import (
+	_ "embed"
+	"encoding/json"
 	"math"
 	"slices"
 	"strconv"
@@ -29,6 +31,31 @@ type point struct {
 	X, Y float64
 }
 
+type water struct {
+	Name  string
+	D     string
+	Label *point
+	Angle float64
+}
+
+type lake struct {
+	Name        string           `json:"name"`
+	Label       [2]float64       `json:"label"`
+	Angle       float64          `json:"angle"`
+	Coordinates [][][][2]float64 `json:"coordinates"`
+}
+
+//go:embed lakes.json
+var lakesJSON []byte
+
+func loadLakes() []lake {
+	var out []lake
+	if err := json.Unmarshal(lakesJSON, &out); err != nil {
+		panic(err)
+	}
+	return out
+}
+
 type mapView struct {
 	Label   string
 	W, H    int
@@ -36,6 +63,8 @@ type mapView struct {
 	Lat0    float64
 	Scale   float64
 	Shapes  []shape
+	Water   []water
+	Holes   string
 	Outline string
 	Marker  *point
 	Pick    bool
@@ -103,6 +132,36 @@ func (m *mapView) highlight(on func(key string) bool) *mapView {
 	return &c
 }
 
+func (m *mapView) addWater(lakes []lake, tolerance float64, labels bool) {
+	for _, l := range lakes {
+		g := kenyageo.Geometry{Coordinates: l.Coordinates}
+		b := bounds(g)
+		x0, y0 := m.xy(b[0], b[3])
+		x1, y1 := m.xy(b[2], b[1])
+		if x1 < 0 || y1 < 0 || x0 > float64(m.W) || y0 > float64(m.H) {
+			continue
+		}
+		w := water{Name: l.Name, D: m.path(g, tolerance), Angle: l.Angle}
+		if labels {
+			x, y := m.xy(l.Label[0], l.Label[1])
+			if x > 0 && y > 0 && x < float64(m.W) && y < float64(m.H) {
+				w.Label = &point{x, y}
+			}
+		}
+		m.Water = append(m.Water, w)
+	}
+}
+
+func holes(g kenyageo.Geometry) kenyageo.Geometry {
+	var out kenyageo.Geometry
+	for _, polygon := range g.Coordinates {
+		for _, ring := range polygon[min(1, len(polygon)):] {
+			out.Coordinates = append(out.Coordinates, [][][2]float64{ring})
+		}
+	}
+	return out
+}
+
 func (m *mapView) with(metrics string, focus bool) *mapView {
 	if m == nil {
 		return nil
@@ -162,7 +221,10 @@ func buildMaps(geo *kenyageo.Data) maps {
 		return out
 	}
 
+	lakes := loadLakes()
+	all[0] -= 0.6
 	out.country = newMap("Map of Kenya's 47 counties", all, 640, 720, 6)
+	var lakeRings kenyageo.Geometry
 	for _, c := range counties {
 		if g, ok := outlines[c.Code]; ok {
 			st := &shapeStats{Population: c.Population, AreaKm2: c.AreaKm2, Density: c.Density()}
@@ -176,8 +238,12 @@ func buildMaps(geo *kenyageo.Data) maps {
 				D:     out.country.path(g, 0.8),
 				Stats: st,
 			})
+			lakeRings.Coordinates = append(lakeRings.Coordinates, holes(g).Coordinates...)
 		}
 	}
+
+	out.country.Holes = out.country.path(lakeRings, 0.8)
+	out.country.addWater(lakes, 0.8, true)
 
 	for _, c := range counties {
 		g, ok := outlines[c.Code]
@@ -186,6 +252,7 @@ func buildMaps(geo *kenyageo.Data) maps {
 		}
 		m := newMap("Map of the wards of "+c.Name, bounds(g), 640, 640, 6)
 		m.Outline = m.path(g, 0.5)
+		m.Holes = m.path(holes(g), 0.5)
 		for _, w := range geo.WardsInCounty(c.Code) {
 			f, ok := geo.WardBoundary(w.Code)
 			if !ok {
@@ -200,6 +267,7 @@ func buildMaps(geo *kenyageo.Data) maps {
 				Stats: &shapeStats{Voters: w.RegisteredVoters2022},
 			})
 		}
+		m.addWater(lakes, 0.5, true)
 		out.counties[c.Code] = m
 	}
 	return out
