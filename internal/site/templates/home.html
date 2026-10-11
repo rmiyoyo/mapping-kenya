@@ -24,7 +24,7 @@
   </thead>
   <tbody>
   {{- range .Counties}}
-    <tr>
+    <tr data-key="{{.Code}}">
       <td>{{.Code}}</td>
       <td><a href="{{countyURL .Code}}">{{.Name}}</a></td>
       <td>{{.Headquarters}}</td>

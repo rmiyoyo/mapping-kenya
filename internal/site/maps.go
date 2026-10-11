@@ -9,11 +9,20 @@ import (
 )
 
 type shape struct {
-	Key  string
-	Name string
-	Href string
-	D    string
-	On   bool
+	Key   string
+	Name  string
+	Href  string
+	D     string
+	On    bool
+	Group string
+	Stats *shapeStats
+}
+
+type shapeStats struct {
+	Population int
+	AreaKm2    float64
+	Density    float64
+	Voters     *int
 }
 
 type point struct {
@@ -30,6 +39,8 @@ type mapView struct {
 	Outline string
 	Marker  *point
 	Pick    bool
+	Metrics string
+	Focus   bool
 }
 
 func newMap(label string, b [4]float64, maxW, maxH, pad float64) *mapView {
@@ -92,6 +103,15 @@ func (m *mapView) highlight(on func(key string) bool) *mapView {
 	return &c
 }
 
+func (m *mapView) with(metrics string, focus bool) *mapView {
+	if m == nil {
+		return nil
+	}
+	c := *m
+	c.Metrics, c.Focus = metrics, focus
+	return &c
+}
+
 func (m *mapView) mark(loc kenyageo.LatLng) *mapView {
 	if m == nil {
 		return nil
@@ -145,11 +165,16 @@ func buildMaps(geo *kenyageo.Data) maps {
 	out.country = newMap("Map of Kenya's 47 counties", all, 640, 720, 6)
 	for _, c := range counties {
 		if g, ok := outlines[c.Code]; ok {
+			st := &shapeStats{Population: c.Population, AreaKm2: c.AreaKm2, Density: c.Density()}
+			if v, ok := geo.CountyVoters(c.Code); ok {
+				st.Voters = &v.RegisteredVoters2022
+			}
 			out.country.Shapes = append(out.country.Shapes, shape{
-				Key:  strconv.Itoa(c.Code),
-				Name: c.Name,
-				Href: countyURL(c.Code),
-				D:    out.country.path(g, 0.8),
+				Key:   strconv.Itoa(c.Code),
+				Name:  c.Name,
+				Href:  countyURL(c.Code),
+				D:     out.country.path(g, 0.8),
+				Stats: st,
 			})
 		}
 	}
@@ -167,10 +192,12 @@ func buildMaps(geo *kenyageo.Data) maps {
 				continue
 			}
 			m.Shapes = append(m.Shapes, shape{
-				Key:  w.Code,
-				Name: titleCase(w.Name),
-				Href: wardURL(w.Code),
-				D:    m.path(f.Geometry, 0.5),
+				Key:   w.Code,
+				Name:  titleCase(w.Name),
+				Href:  wardURL(w.Code),
+				D:     m.path(f.Geometry, 0.5),
+				Group: w.Constituency,
+				Stats: &shapeStats{Voters: w.RegisteredVoters2022},
 			})
 		}
 		out.counties[c.Code] = m

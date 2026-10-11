@@ -52,6 +52,10 @@ func TestPages(t *testing.T) {
 		{"/static/site.css", 200, []string{"--paper"}},
 		{"/static/site.js", 200, []string{"geolocation"}},
 		{"/nope", 404, []string{"There is no page at /nope"}},
+		{"/?sort=code", 200, []string{`data-metrics="population density voters area"`, `data-key="47"`, `data-population="4397073"`, `data-voters="2415310"`, `<tr data-key="47">`, "d3@7.9.0", "/static/charts.js"}},
+		{"/counties/47", 200, []string{`data-metrics="voters"`, `data-group="Kibra"`, `data-chart="constituencies"`, `{"name":"Kibra","href":"/constituencies/Kibra"`}},
+		{"/wards/0040", 200, []string{"data-focus", `data-key="0040"`}},
+		{"/static/charts.js", 200, []string{"d3.zoom", "scaleQuantile"}},
 	}
 	for _, tt := range tests {
 		status, body := get(t, tt.path)
