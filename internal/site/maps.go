@@ -26,6 +26,7 @@ type shapeStats struct {
 	Density    float64
 	Voters     *int
 	Living     *kenyageo.Living
+	County     *kenyageo.County
 }
 
 type point struct {
@@ -230,8 +231,8 @@ func buildMaps(geo *kenyageo.Data) maps {
 	var lakeRings kenyageo.Geometry
 	for _, c := range counties {
 		if g, ok := outlines[c.Code]; ok {
-			living := c.Living
-			st := &shapeStats{Population: c.Population, AreaKm2: c.AreaKm2, Density: c.Density(), Living: &living}
+			living, county := c.Living, c
+			st := &shapeStats{Population: c.Population, AreaKm2: c.AreaKm2, Density: c.Density(), Living: &living, County: &county}
 			if v, ok := geo.CountyVoters(c.Code); ok {
 				st.Voters = &v.RegisteredVoters2022
 			}

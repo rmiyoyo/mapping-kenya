@@ -13,6 +13,11 @@
   --accent-soft: oklch(91% 0.03 255);
   --scale-lo: oklch(95% 0.04 88);
   --scale-hi: oklch(46% 0.14 32);
+  --faith-christian: oklch(48% 0.11 255);
+  --faith-muslim: oklch(58% 0.11 165);
+  --faith-traditionist: oklch(70% 0.12 75);
+  --faith-other: oklch(62% 0.09 320);
+  --faith-none: oklch(62% 0.015 255);
   --code-bg: oklch(95% 0.009 95);
   --tok-key: oklch(42% 0.12 255);
   --tok-str: oklch(45% 0.1 150);
@@ -695,6 +700,73 @@ tbody tr:hover, tr.hl {
   left: calc(var(--k, 0) * 100%);
   width: 2px;
   background: var(--ink);
+}
+
+.religion {
+  margin-top: var(--space-lg);
+}
+
+.stack {
+  display: flex;
+  height: 0.85rem;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.stack .seg {
+  flex: 0 0 calc(var(--w, 0) * 1%);
+}
+
+.stack .seg + .seg {
+  border-left: 1px solid var(--paper);
+}
+
+.faiths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-md);
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.faiths .n {
+  color: var(--muted);
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-right: 0.35rem;
+  border-radius: 2px;
+  vertical-align: -0.05em;
+}
+
+.christian {
+  background: var(--faith-christian);
+}
+
+.muslim {
+  background: var(--faith-muslim);
+}
+
+.traditionist {
+  background: var(--faith-traditionist);
+}
+
+.other {
+  background: var(--faith-other);
+}
+
+.none {
+  background: var(--faith-none);
+}
+
+.unknown {
+  background: var(--rule-strong);
 }
 
 .kenya {

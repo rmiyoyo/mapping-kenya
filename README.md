@@ -27,8 +27,8 @@ docker run -p 8080:8080 mapping-kenya
 
 | Page | Shows |
 | --- | --- |
-| `/` | a map of the 47 counties shaded by any of ten measures, the top ten for that measure, and a table of all 47 you can sort |
-| `/counties/32` | a county's wards on a map shaded by registered voters, its census figures and living conditions against Kenya's, its constituencies ranked by voters, neighbours and post offices |
+| `/` | a map of the 47 counties shaded by any of fourteen measures, the top ten for that measure, and a table of all 47 you can sort |
+| `/counties/32` | a county's wards on a map shaded by registered voters, its census figures, urban share and living conditions against Kenya's, its religious make-up, its constituencies ranked by voters, neighbours and post offices |
 | `/constituencies/Kibra` | a constituency's wards, highlighted on the county map |
 | `/wards/0040` | one ward, its nearest post offices and the other wards in its constituency |
 | `/postcodes/00100` | a post office, where it is and which ward it falls in |
@@ -42,12 +42,12 @@ The pages are plain HTML rendered on the server, and they work without JavaScrip
 
 - Every map zooms and pans: drag, pinch, use the + and − buttons, or hold Ctrl and scroll. Ward and constituency pages start zoomed in on the place.
 - Pointing at a county or ward shows its figures in a tooltip.
-- The home map can be shaded by population, density, household size, the share of homes lit by mains electricity, the share with piped water, internet use, mobile phone ownership, school attendance, registered voters or area. A picker groups them, a legend explains the shading, and the top-ten list beside the map re-ranks to match. Pointing at a county highlights it in the list and the table, and the other way round.
+- The home map can be shaded by population, density, the share living in urban areas, household size, the share of homes lit by mains electricity, the share with piped water, internet use, mobile phone ownership, school attendance, the shares who are Christian, Muslim or of no religion, registered voters or area. A picker groups them, a legend explains the shading, and the top-ten list beside the map re-ranks to match. Pointing at a county highlights it in the list and the table, and the other way round.
 - County maps are shaded by registered voters per ward. Pointing at a constituency in the list highlights its wards on the map, and pointing at a ward highlights its constituency.
 
 ## Where the figures come from
 
-Everything comes from the kenya-geo package, which documents its sources. Population, households and living conditions are from the [KNBS 2019 Kenya Population and Housing Census](https://open.africa/dataset/2019-kenya-population-and-housing-census) (CC BY), registered voters from the IEBC, and boundaries from geoBoundaries. kenya-geo's [API docs](https://github.com/rmiyoyo/kenya-geo/blob/main/api/README.md#get-countiescounty) say which census table each living-conditions figure comes from.
+Everything comes from the kenya-geo package, which documents its sources. Population, urban and rural population, households, living conditions and religious affiliation are from the [KNBS 2019 Kenya Population and Housing Census](https://open.africa/dataset/2019-kenya-population-and-housing-census) (CC BY), registered voters from the IEBC, and boundaries from geoBoundaries. kenya-geo's [API docs](https://github.com/rmiyoyo/kenya-geo/blob/main/api/README.md#get-countiescounty) say which census table each living-conditions figure comes from.
 
 ## The API documentation
 

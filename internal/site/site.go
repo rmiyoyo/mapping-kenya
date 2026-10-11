@@ -135,7 +135,7 @@ var sorts = map[string]func(a, b countyRow) int{
 }
 
 func (s *site) home(w http.ResponseWriter, r *http.Request) {
-	d := homeData{Map: s.maps.country.with("population density household-size electricity water internet mobile school voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
+	d := homeData{Map: s.maps.country.with("population density urban household-size electricity water internet mobile school christian muslim no-religion voters area", false), Sort: r.URL.Query().Get("sort"), Voters: s.geo.NationalVoters()}
 	by, ok := sorts[d.Sort]
 	d.TableOpen = ok
 	if !ok {
@@ -172,6 +172,48 @@ type countyData struct {
 	Wards          int
 	PostOffices    []kenyageo.PostOffice
 	Living         []livingRow
+	Religion       religionData
+}
+
+type faith struct {
+	Label string
+	Pct   float64
+	Class string
+}
+
+type religionData struct {
+	Groups    []faith
+	Christian []faith
+	Kenya     string
+}
+
+func religionOf(r, k kenyageo.Religion, haveKenya bool) religionData {
+	if r.Total == 0 {
+		return religionData{}
+	}
+	d := religionData{
+		Groups: []faith{
+			{"Christian", r.Pct(r.Christian()), "christian"},
+			{"Muslim", r.Pct(r.Islam), "muslim"},
+			{"Traditionist", r.Pct(r.Traditionist), "traditionist"},
+			{"Hindu and other religions", r.Pct(r.Hindu + r.OtherReligion), "other"},
+			{"No religion", r.Pct(r.NoReligion), "none"},
+			{"Didn't say", r.Pct(r.DontKnow + r.NotStated), "unknown"},
+		},
+		Christian: []faith{
+			{"Protestant", r.Pct(r.Protestant), ""},
+			{"Evangelical", r.Pct(r.Evangelical), ""},
+			{"Catholic", r.Pct(r.Catholic), ""},
+			{"African instituted", r.Pct(r.AfricanInstituted), ""},
+			{"Orthodox", r.Pct(r.Orthodox), ""},
+			{"other Christian", r.Pct(r.OtherChristian), ""},
+		},
+	}
+	slices.SortStableFunc(d.Christian, func(a, b faith) int { return cmp.Compare(b.Pct, a.Pct) })
+	if haveKenya {
+		d.Kenya = "Kenya: " + decimal(k.Pct(k.Christian())) + "% Christian, " + decimal(k.Pct(k.Islam)) + "% Muslim, " + decimal(k.Pct(k.NoReligion)) + "% no religion"
+	}
+	return d
 }
 
 type livingRow struct {
@@ -184,7 +226,15 @@ type livingRow struct {
 	Percent bool
 }
 
-func livingRows(c, k kenyageo.Living, haveKenya bool) []livingRow {
+func urbanPct(urban, rural int) float64 {
+	if urban+rural == 0 {
+		return 0
+	}
+	return 100 * float64(urban) / float64(urban+rural)
+}
+
+func livingRows(county kenyageo.County, nat kenyageo.National, haveKenya bool) []livingRow {
+	c, k := county.Living, nat.Living
 	pct := func(label string, v, n float64) livingRow {
 		r := livingRow{Label: label, Value: decimal(v) + "%", Share: v / 100, Percent: true, Above: v >= n}
 		if haveKenya {
@@ -203,6 +253,7 @@ func livingRows(c, k kenyageo.Living, haveKenya bool) []livingRow {
 	return []livingRow{
 		{Label: "Households", Value: num(c.Households)},
 		size,
+		pct("People living in urban areas", county.UrbanPct(), urbanPct(nat.PopulationUrban, nat.PopulationRural)),
 		pct("Homes lit by mains electricity", c.ElectricityPct, k.ElectricityPct),
 		pct("Homes with piped water", c.PipedWaterPct, k.PipedWaterPct),
 		pct("People using the internet", c.InternetPct, k.InternetPct),
@@ -232,8 +283,9 @@ func (s *site) county(w http.ResponseWriter, r *http.Request) {
 		PostOffices: s.geo.PostOfficesInCounty(c.Code),
 	}
 	d.Voters, _ = s.geo.CountyVoters(c.Code)
-	national, ok := s.geo.NationalLiving()
-	d.Living = livingRows(c.Living, national, ok)
+	national, ok := s.geo.National()
+	d.Living = livingRows(c, national, ok)
+	d.Religion = religionOf(c.Religion, national.Religion, ok)
 	for _, name := range s.geo.Constituencies(c.Code) {
 		g := constituencyGroup{Name: name, Wards: s.geo.WardsInConstituency(name)}
 		g.Voters, _ = s.geo.ConstituencyVoters(name)

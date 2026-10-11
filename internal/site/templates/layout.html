@@ -71,9 +71,11 @@
 </figure>
 {{end}}
 
-{{define "shape"}}<path d="{{.D}}" data-key="{{.Key}}" data-name="{{.Name}}"{{with .Group}} data-group="{{.}}"{{end}}{{with .Stats}}{{if .Population}} data-population="{{.Population}}" data-area="{{.AreaKm2}}" data-density="{{.Density}}"{{end}}{{with .Voters}} data-voters="{{.}}"{{end}}{{with .Living}}{{template "living-data" .}}{{end}}{{end}}{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>{{end}}
+{{define "shape"}}<path d="{{.D}}" data-key="{{.Key}}" data-name="{{.Name}}"{{with .Group}} data-group="{{.}}"{{end}}{{with .Stats}}{{if .Population}} data-population="{{.Population}}" data-area="{{.AreaKm2}}" data-density="{{.Density}}"{{end}}{{with .Voters}} data-voters="{{.}}"{{end}}{{with .Living}}{{template "living-data" .}}{{end}}{{with .County}}{{template "census-data" .}}{{end}}{{end}}{{if .On}} class="on"{{end}}><title>{{.Name}}</title></path>{{end}}
 
 {{define "living-data"}} data-households="{{.Households}}" data-household-size="{{.HouseholdSize}}" data-electricity="{{.ElectricityPct}}" data-water="{{.PipedWaterPct}}" data-internet="{{.InternetPct}}" data-mobile="{{.MobilePhonePct}}" data-school="{{.SchoolAttendancePct}}"{{end}}
+
+{{define "census-data"}} data-urban="{{printf "%.1f" .UrbanPct}}" data-christian="{{printf "%.1f" (.Religion.Pct .Religion.Christian)}}" data-muslim="{{printf "%.1f" (.Religion.Pct .Religion.Islam)}}" data-no-religion="{{printf "%.1f" (.Religion.Pct .Religion.NoReligion)}}"{{end}}
 
 {{define "voters"}}{{num .RegisteredVoters2022}}{{if not .Complete}}<sup><a href="#incomplete" title="One or more wards have no figure">*</a></sup>{{end}}{{end}}
 

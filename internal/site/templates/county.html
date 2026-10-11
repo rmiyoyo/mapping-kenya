@@ -56,6 +56,20 @@
       <p class="note">The tick on each bar marks the figure for Kenya as a whole.</p>
     </section>
     {{end}}
+    {{with .Religion.Groups}}
+    <section class="religion" aria-labelledby="religion-title">
+      <h2 id="religion-title" class="small">Religion, 2019 census</h2>
+      <div class="stack" role="img" aria-label="{{range $i, $g := .}}{{if $i}}, {{end}}{{$g.Label}} {{decimal $g.Pct}}%{{end}}">
+        {{- range .}}{{if ge .Pct 0.5}}<span class="seg {{.Class}}" style="--w: {{.Pct}}"></span>{{end}}{{end -}}
+      </div>
+      <ul class="faiths">
+      {{- range .}}{{if ge .Pct 0.1}}
+        <li><span class="swatch {{.Class}}"></span>{{.Label}} <span class="n">{{decimal .Pct}}%</span></li>
+      {{- end}}{{end}}
+      </ul>
+      <p class="note">Christians: {{range $i, $c := $.Data.Religion.Christian}}{{if $i}} · {{end}}{{$c.Label}} {{decimal $c.Pct}}%{{end}}. {{$.Data.Religion.Kenya}}.</p>
+    </section>
+    {{end}}
   </div>
 </div>
 
