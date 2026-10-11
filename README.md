@@ -44,7 +44,8 @@ The pages are plain HTML rendered on the server, and they work without JavaScrip
 - Pointing at a county or ward shows its figures in a tooltip.
 - The home map is shaded by population, density, registered voters or area, with a switch and a legend. On the home page, pointing at a county also highlights its row in the table, and the other way round.
 - County maps are shaded by registered voters per ward. Below them, each constituency has a bar for its voters and opens to list its wards. Pointing at a constituency highlights its wards on the map, and pointing at a ward highlights its constituency.
-- Lake Victoria and Lake Turkana are drawn on the maps from Natural Earth's public-domain lake outlines, kept in `internal/site/lakes.json`.
+- Lake Victoria, Lake Turkana and the Indian Ocean are drawn on the maps from Natural Earth's public-domain outlines, kept in `internal/site/lakes.json` and `internal/site/ocean.json`. The ocean is cut down to a box around Kenya so the file stays small, and it sits under the county shapes, so where the two coastlines disagree the county wins.
+- The maps only count a press as a drag once the pointer moves more than a few pixels (`clickDistance` on `d3.zoom`). Without that, the slightest wobble during a click turned it into a pan and the county link never opened.
 - The home page table shows the top ten counties for the chosen column, with a link to show all 47.
 
 ## The API documentation

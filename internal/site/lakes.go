@@ -11,6 +11,9 @@ import (
 //go:embed lakes.json
 var lakesJSON []byte
 
+//go:embed ocean.json
+var oceanJSON []byte
+
 type lake struct {
 	Name  string
 	Label kenyageo.LatLng
@@ -19,7 +22,8 @@ type lake struct {
 
 type lakeShape struct {
 	Name  string
-	Word  string
+	First string
+	Rest  string
 	D     string
 	Label *point
 }
@@ -27,14 +31,15 @@ type lakeShape struct {
 var labels = map[string]kenyageo.LatLng{
 	"Lake Victoria": {Lat: -0.62, Lng: 33.62},
 	"Lake Turkana":  {Lat: 3.3, Lng: 36.75},
+	"Indian Ocean":  {Lat: -3.3, Lng: 41.2},
 }
 
-func loadLakes() []lake {
+func loadLakes(data []byte) []lake {
 	var raw []struct {
 		Name string `json:"name"`
 		kenyageo.Geometry
 	}
-	if err := json.Unmarshal(lakesJSON, &raw); err != nil {
+	if err := json.Unmarshal(data, &raw); err != nil {
 		panic(err)
 	}
 	out := make([]lake, len(raw))
@@ -48,16 +53,24 @@ func overlaps(a, b [4]float64) bool {
 	return a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3]
 }
 
-func (m *mapView) addLakes(lakes []lake, view [4]float64, tolerance float64) {
+func waterShapes(m *mapView, lakes []lake, view [4]float64, tolerance float64) []lakeShape {
+	var out []lakeShape
 	for _, l := range lakes {
 		if !overlaps(bounds(l.Geometry), view) {
 			continue
 		}
-		s := lakeShape{Name: l.Name, Word: strings.TrimPrefix(l.Name, "Lake "), D: m.path(l.Geometry, tolerance)}
+		first, rest, _ := strings.Cut(l.Name, " ")
+		s := lakeShape{Name: l.Name, First: first, Rest: rest, D: m.path(l.Geometry, tolerance)}
 		if a := l.Label; a.Lng > view[0] && a.Lng < view[2] && a.Lat > view[1] && a.Lat < view[3] {
 			x, y := m.xy(l.Label.Lng, l.Label.Lat)
 			s.Label = &point{x, y}
 		}
-		m.Lakes = append(m.Lakes, s)
+		out = append(out, s)
 	}
+	return out
+}
+
+func (m *mapView) addWater(lakes, sea []lake, view [4]float64, tolerance float64) {
+	m.Lakes = waterShapes(m, lakes, view, tolerance)
+	m.Sea = waterShapes(m, sea, view, tolerance)
 }

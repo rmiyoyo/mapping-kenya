@@ -27,7 +27,7 @@
 {{template "content" .}}
 </main>
 <footer>
-  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, lakes from Natural Earth, post offices from GeoNames and OpenStreetMap.</p>
+  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, lakes and ocean from Natural Earth, post offices from GeoNames and OpenStreetMap.</p>
   <p>Boundaries are simplified, so treat anything near a line as approximate.</p>
 </footer>
 </body>
@@ -38,6 +38,16 @@
 <figure class="map{{if .Pick}} pick{{end}}"{{with .Metrics}} data-metrics="{{.}}"{{end}}{{if .Focus}} data-focus{{end}}>
   <svg viewBox="0 0 {{.W}} {{.H}}" role="img" aria-label="{{.Label}}" data-lng0="{{.Lng0}}" data-lat0="{{.Lat0}}" data-scale="{{.Scale}}">
     <g class="layer">
+    {{- with .Sea}}
+    <g class="sea">
+    {{- range .}}
+    <path class="ocean" d="{{.D}}"/>
+    {{- end}}
+    {{- range $l := .}}{{with $l.Label}}
+    <text class="lake-label sea-label" x="{{.X}}" y="{{.Y}}"><tspan x="{{.X}}">{{$l.First}}</tspan><tspan x="{{.X}}" dy="1.15em">{{$l.Rest}}</tspan></text>
+    {{- end}}{{end}}
+    </g>
+    {{- end}}
     <g class="shapes">
     {{- range .Shapes}}
     {{- if and .Href (not $.Pick)}}
@@ -56,7 +66,7 @@
     <path class="lake" d="{{.D}}"/>
     {{- end}}
     {{- range $l := .}}{{with $l.Label}}
-    <text class="lake-label" x="{{.X}}" y="{{.Y}}"><tspan x="{{.X}}">Lake</tspan><tspan x="{{.X}}" dy="1.15em">{{$l.Word}}</tspan></text>
+    <text class="lake-label" x="{{.X}}" y="{{.Y}}"><tspan x="{{.X}}">{{$l.First}}</tspan><tspan x="{{.X}}" dy="1.15em">{{$l.Rest}}</tspan></text>
     {{- end}}{{end}}
     </g>
     {{- end}}

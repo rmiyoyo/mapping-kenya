@@ -274,8 +274,18 @@ input:focus, button:focus-visible, a:focus-visible {
   pointer-events: none;
 }
 
-.map .water {
+.map .water, .map .sea {
   pointer-events: none;
+}
+
+.map path.ocean {
+  fill: var(--water);
+  stroke: none;
+}
+
+.map .sea-label {
+  font-size: 13px;
+  letter-spacing: 0.08em;
 }
 
 .map path.lake {

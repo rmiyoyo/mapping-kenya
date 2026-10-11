@@ -56,6 +56,7 @@ func TestPages(t *testing.T) {
 		{"/counties/47", 200, []string{`data-metrics="voters"`, `data-group="Kibra"`, `<li data-group="Kibra">`, `href="/constituencies/Kibra"`, `<i style="width: `}},
 		{"/?all", 200, []string{`<table class="counties">`, `<tr data-key="4" class="more">`}},
 		{"/counties/43", 200, []string{`class="lake"`}},
+		{"/counties/1", 200, []string{`class="ocean"`, "Ocean</tspan>"}},
 		{"/wards/0040", 200, []string{"data-focus", `data-key="0040"`}},
 		{"/static/charts.js", 200, []string{"d3.zoom", "scaleQuantile"}},
 	}

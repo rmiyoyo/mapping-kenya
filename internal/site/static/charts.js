@@ -59,10 +59,13 @@
     var box = svg.node().viewBox.baseVal;
     var shapes = layer.selectAll("path[data-key]");
     var marker = layer.select(".marker");
-    var labels = layer.selectAll(".lake-label");
+    var labels = layer.selectAll(".lake-label")
+      .attr("data-size", function () { return parseFloat(getComputedStyle(this).fontSize); });
     shapes.selectAll("title").remove();
 
     var zoom = d3.zoom()
+      .clickDistance(6)
+      .tapDistance(12)
       .scaleExtent([1, 16])
       .translateExtent([[0, 0], [box.width, box.height]])
       .filter(function (event) {
@@ -71,7 +74,7 @@
       .on("zoom", function (event) {
         layer.attr("transform", event.transform);
         marker.attr("r", 5 / event.transform.k);
-        labels.style("font-size", 11 / event.transform.k + "px");
+        labels.style("font-size", function () { return this.getAttribute("data-size") / event.transform.k + "px"; });
         figure.classList.toggle("zoomed", event.transform.k > 1.01);
       });
     svg.call(zoom).on("dblclick.zoom", null);
