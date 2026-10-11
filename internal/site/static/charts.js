@@ -7,12 +7,16 @@
   var metrics = {
     population: { group: "People", short: "Population", label: "Population, 2019", heading: "population", format: whole, tick: d3.format(".2~s") },
     density: { group: "People", short: "Density", label: "People per km²", heading: "density", format: function (v) { return whole(Math.round(v)); }, tick: d3.format(",.0f") },
+    urban: { group: "People", short: "Urban population", label: "People living in urban areas", heading: "urban share", format: percent, tick: d3.format(".0f") },
     "household-size": { group: "People", short: "Household size", label: "People per household", heading: "household size", format: tenth, tick: d3.format(".1f") },
     electricity: { group: "Living conditions, 2019", short: "Electricity", label: "Homes lit by mains electricity", heading: "electricity", format: percent, tick: d3.format(".0f") },
     water: { group: "Living conditions, 2019", short: "Piped water", label: "Homes with piped water", heading: "piped water", format: percent, tick: d3.format(".0f") },
     internet: { group: "Living conditions, 2019", short: "Internet use", label: "People using the internet", heading: "internet use", format: percent, tick: d3.format(".0f") },
     mobile: { group: "Living conditions, 2019", short: "Mobile phones", label: "People owning a mobile phone", heading: "mobile phones", format: percent, tick: d3.format(".0f") },
     school: { group: "Living conditions, 2019", short: "School attendance", label: "Children aged 6 to 17 in school", heading: "school attendance", format: percent, tick: d3.format(".0f") },
+    christian: { group: "Religion, 2019", short: "Christian", label: "Christian", heading: "Christian share", format: percent, tick: d3.format(".0f") },
+    muslim: { group: "Religion, 2019", short: "Muslim", label: "Muslim", heading: "Muslim share", format: percent, tick: d3.format(".0f") },
+    "no-religion": { group: "Religion, 2019", short: "No religion", label: "No religion", heading: "share with no religion", format: percent, tick: d3.format(".1f") },
     voters: { group: "Elections", short: "Voters", label: "Registered voters, 2022", heading: "registered voters", format: whole, tick: d3.format(".2~s") },
     area: { group: "Land", short: "Area", label: "Area, km²", heading: "area", format: tenth, tick: d3.format(".2~s") }
   };
