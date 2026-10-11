@@ -30,7 +30,7 @@
 {{template "content" .}}
 </main>
 <footer>
-  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, Lake Victoria and Lake Turkana from Natural Earth, post offices from GeoNames and OpenStreetMap.</p>
+  <p>Built on the <a href="https://pkg.go.dev/github.com/rmiyoyo/kenya-geo">kenya-geo</a> Go package. Population from the 2019 census (KNBS), wards and registered voters from the IEBC, boundaries from geoBoundaries, lakes and the Indian Ocean from Natural Earth, post offices from GeoNames and OpenStreetMap.</p>
   <p>Boundaries are simplified, so treat anything near a line as approximate.</p>
 </footer>
 </body>
@@ -41,6 +41,9 @@
 <figure class="map{{if .Pick}} pick{{end}}"{{with .Metrics}} data-metrics="{{.}}"{{end}}{{if .Focus}} data-focus{{end}}>
   <svg viewBox="0 0 {{.W}} {{.H}}" role="img" aria-label="{{.Label}}" data-lng0="{{.Lng0}}" data-lat0="{{.Lat0}}" data-scale="{{.Scale}}">
     <g class="layer">
+    {{- range .Water}}{{if .Under}}
+    <path class="water sea" d="{{.D}}"/>
+    {{- end}}{{end}}
     {{- with .Holes}}
     <path class="water holes" d="{{.}}"/>
     {{- end}}
@@ -51,9 +54,9 @@
     {{template "shape" .}}
     {{- end}}
     {{- end}}
-    {{- range .Water}}
+    {{- range .Water}}{{if not .Under}}
     <path class="water" d="{{.D}}"><title>{{.Name}}</title></path>
-    {{- end}}
+    {{- end}}{{end}}
     {{- range .Water}}{{$name := .Name}}{{$angle := .Angle}}{{with .Label}}
     <text class="water-label" x="{{.X}}" y="{{.Y}}" transform="rotate({{$angle}} {{.X}} {{.Y}})">{{$name}}</text>
     {{- end}}{{end}}

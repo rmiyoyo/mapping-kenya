@@ -395,18 +395,22 @@ input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visibl
   fill: var(--accent);
 }
 
-.map path.hover {
-  stroke: var(--ink);
-  stroke-width: 1.6;
-}
-
 .map path.grp {
   fill: var(--accent) !important;
 }
 
 .map path.water {
   fill: var(--water);
+  fill-rule: evenodd;
   stroke: none;
+  pointer-events: none;
+}
+
+.map .hover-outline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 

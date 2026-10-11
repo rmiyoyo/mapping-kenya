@@ -54,7 +54,7 @@ func TestPages(t *testing.T) {
 		{"/nope", 404, []string{"There is no page at /nope"}},
 		{"/?sort=code", 200, []string{`data-metrics="population density voters area"`, `data-key="47"`, `data-population="4397073"`, `data-voters="2415310"`, `<tr data-key="47">`, "d3@7.9.0", "/static/charts.js"}},
 		{"/counties/47", 200, []string{`data-metrics="voters"`, `<li data-group="Kibra">`, `href="/constituencies/Kibra"`, "48 post offices</summary>"}},
-		{"/", 200, []string{`class="water"`, ">Lake Turkana</text>", ">Lake Victoria</text>", `<ol class="ranking">`, "--share: 1", `<details class="all" id="counties">`}},
+		{"/", 200, []string{`class="water"`, ">Lake Turkana</text>", ">Lake Victoria</text>", ">Indian Ocean</text>", `class="water sea"`, `<ol class="ranking">`, "--share: 1", `<details class="all" id="counties">`}},
 		{"/?sort=area", 200, []string{`<details class="all" id="counties" open>`}},
 		{"/counties/43", 200, []string{`class="water"`, "Lake Victoria"}},
 		{"/wards/0040", 200, []string{"data-focus", `data-key="0040"`}},

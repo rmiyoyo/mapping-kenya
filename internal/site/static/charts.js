@@ -64,6 +64,8 @@
     shapes.selectAll("title").remove();
 
     var zoom = d3.zoom()
+      .clickDistance(6)
+      .tapDistance(12)
       .scaleExtent([1, 16])
       .translateExtent([[0, 0], [box.width, box.height]])
       .filter(function (event) {
@@ -100,26 +102,28 @@
       }
     }
 
+    var outline = layer.append("path").attr("class", "hover-outline").attr("aria-hidden", "true");
+    function highlight(el) {
+      outline.attr("d", el ? el.getAttribute("d") : null);
+    }
+
     var hooks = { enter: [], leave: [] };
     shapes
       .on("pointerenter", function (event) {
         var el = this;
-        var host = el.parentNode.tagName.toLowerCase() === "a" ? el.parentNode : el;
-        d3.select(el).classed("hover", true);
-        d3.select(host).raise();
-        layer.selectAll(".water, .water-label, .outline, .marker").raise();
+        highlight(el);
         showTip(event, el);
         hooks.enter.forEach(function (f) { f(el); });
       })
       .on("pointermove", moveTip)
       .on("pointerleave", function () {
         var el = this;
-        d3.select(el).classed("hover", false);
+        highlight(null);
         hideTip();
         hooks.leave.forEach(function (f) { f(el); });
       });
 
-    return { figure: figure, shapes: shapes, hooks: hooks, listeners: [] };
+    return { figure: figure, shapes: shapes, hooks: hooks, listeners: [], highlight: highlight };
   }
 
   function choropleth(map) {
@@ -204,12 +208,10 @@
     var rows = d3.selectAll("tr[data-key], li[data-key]");
     rows
       .on("mouseenter", function () {
-        var el = byKey[this.getAttribute("data-key")];
-        if (el) d3.select(el).classed("hover", true);
+        map.highlight(byKey[this.getAttribute("data-key")] || null);
       })
       .on("mouseleave", function () {
-        var el = byKey[this.getAttribute("data-key")];
-        if (el) d3.select(el).classed("hover", false);
+        map.highlight(null);
       });
 
     var groups = d3.selectAll("li[data-group]");

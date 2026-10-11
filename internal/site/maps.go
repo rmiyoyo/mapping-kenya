@@ -36,12 +36,14 @@ type water struct {
 	D     string
 	Label *point
 	Angle float64
+	Under bool
 }
 
 type lake struct {
 	Name        string           `json:"name"`
 	Label       [2]float64       `json:"label"`
 	Angle       float64          `json:"angle"`
+	Under       bool             `json:"under"`
 	Coordinates [][][][2]float64 `json:"coordinates"`
 }
 
@@ -141,7 +143,7 @@ func (m *mapView) addWater(lakes []lake, tolerance float64, labels bool) {
 		if x1 < 0 || y1 < 0 || x0 > float64(m.W) || y0 > float64(m.H) {
 			continue
 		}
-		w := water{Name: l.Name, D: m.path(g, tolerance), Angle: l.Angle}
+		w := water{Name: l.Name, D: m.path(g, tolerance), Angle: l.Angle, Under: l.Under}
 		if labels {
 			x, y := m.xy(l.Label[0], l.Label[1])
 			if x > 0 && y > 0 && x < float64(m.W) && y < float64(m.H) {
